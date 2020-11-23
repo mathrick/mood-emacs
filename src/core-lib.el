@@ -21,6 +21,9 @@ symbol prepended with :"
                                   (subseq components 0 -1))
                           (last components))))
 
+(defun file-parent-directory (path)
+  (file-name-directory (directory-file-name path)))
+
 ;; Lifted from doom
 (defmacro setq! (&rest settings)
   "A stripped-down `customize-set-variable' with the syntax of `setq'.

@@ -1,0 +1,4 @@
+* Description
+  This is a base module providing OS-specific support, particularly on
+  Windows. It is *strongly recommended* and should not be disabled
+  without an important reason.

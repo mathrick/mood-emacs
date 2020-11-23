@@ -107,8 +107,9 @@ The basic installation steps are as follows:
    ```
    This location will be referred to as `<mood root>` from now on.
    
-   **NOTE**: This is _not_ the same as your emacs config dir! See next step.
-2. Create a directory where your Mood-powered emacs config will
+   **NOTE**: This is _not_ the same as your Emacs config dir! See next step.
+
+2. Create a directory where your Mood-powered Emacs config will
    live. This can either be the standard location (`~/.emacs.d/`), or
    somewhere else. For me, it's `~/elisp`.
    ```
@@ -120,6 +121,7 @@ The basic installation steps are as follows:
    **NOTE**: It is **strongly recommended** to keep your config under
    version control. It doesn't need to be git, but it should be a
    version control tool you're comfortable with.
+
 3. Create an init file. It can be any of the [files Emacs will read on
    startup](https://www.gnu.org/software/emacs/manual/html_node/emacs/Init-File.html).
    Give it the following contents:
@@ -137,6 +139,27 @@ The basic installation steps are as follows:
      (("default" . ((user-emacs-directory . "~/.emacs.d")))
       ("mood" . ((user-emacs-directory . "~/elisp"))))
      ```
+4. Start Emacs. If using Chemacs, start it with the newly created profile:
+   ```
+   emacs --with-profile mood
+   ```
+   This will bootstrap [`straight.el`](https://github.com/raxod502/straight.el)
+   and install the required libraries (Internet connection is
+   necessary). Depending on your connection speed, it might take a
+   while, but Mood configures `straight.el` to minimise the badwidth
+   requirements, and for me, it takes only about 7 seconds.
+
+   **NOTE**: The bootstrap will only happen the first time you run
+   Mood Emacs, and after updates and changes to your
+   config. Otherwise, it will be skipped and Emacs should start almost
+   instantly.
+
+5. At the end of the bootstrap, Mood will prompt to create the
+   `config.el` file from template. Answer `y` to that, then edit the
+   default config to your liking. When you're done, run `M-x
+   mood-reload` or restart Emacs.
+
+6. Congratulations! Your Emacs is now ready to use.
 
 Usage
 =====

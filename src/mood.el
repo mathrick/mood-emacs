@@ -17,6 +17,7 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Definitions
+
 (defvar *mood-elisp-root*
   (if (getenv "MOOD_ELISP_ROOT")
       (expand-file-name (concat (getenv "MOOD_ELISP_ROOT") "/"))
@@ -34,13 +35,13 @@
 (require 'core-lib)
 (require 'cl)
 
+(defvar *mood-checkout-root* (file-parent-directory *mood-elisp-root*)
+  "Root directory of the Mood checkout, ie. the directory
+  containing src/ and modules/")
+
 (defvar *mood-module-paths*
-  (list (file-name-as-directory (join-path user-emacs-directory "modules"))
-        ;; This tedious dance of (file-name-directory (directory-file-name)) is
-        ;; how you get the parent dir reliably in elisp :\
-        (file-name-as-directory (join-path (file-name-directory
-                                            (directory-file-name *mood-elisp-root*))
-                                           "modules")))
+  (loop for dir in (list user-emacs-directory *mood-checkout-root*)
+        collect (join-path dir "modules"))
   "List of directories where Mood modules can be found. Earlier
   entries take precedence over later ones, so upstream modules
   can be overriden by the user")
@@ -170,12 +171,12 @@ positional arguments and quotes them"
 
 (defun mood-load-module (section module &optional flags)
   "Load the specified MODULE from SECTION, adding FLAGS to
-`*mood-features-flags*'. SECTION should be a keyword, MODULE might be
-either a keyword or a plain symbol"
-  (let* ((module-dir (concat (file-name-as-directory (keyword-or-symbol-name section))
-                             (file-name-as-directory (keyword-or-symbol-name module))))
+`*mood-features-flags*'. SECTION should be a keyword, MODULE
+should be a plain symbol"
+  (let* ((module-dir (join-path (keyword-or-symbol-name section)
+                                (keyword-or-symbol-name module)))
          (module-path (loop for path in *mood-module-paths*
-                            for candidate = (concat path module-dir)
+                            for candidate = (join-path path module-dir)
                             if (file-exists-p candidate)
                             return candidate
                             finally (error "Module %s/%s not found" section module)))
@@ -261,13 +262,61 @@ either a keyword or a plain symbol"
                                              (end-of-file nil))
                                 while form
                                 collect form))))))
-    `(macrolet ((init (&body body)
-                      ;; Double backquotes are too annoying to deal with
-                      (apply #'list 'progn (mood--parse-init-block body))))
+    `(macrolet ((init! (&body body)
+                       ;; Double backquotes are too annoying to deal with
+                       (apply #'list 'progn (mood--parse-init-block body))))
        ,@user-code)))
 
+(defun mood-create-user-config-file (file &optional openp)
+  "Create user config from template, write it to FILE. If OPENP
+  is given, `find-file' will be called on the created file.
+
+WARNING: This will *overwrite* existing files, see
+`mood-maybe-create-user-config' and `mood-open-user-config' for a
+safer, interactive alternative that will prompt the user to
+create the config if missing."
+  (let ((user-config-template (join-path *mood-checkout-root* "config.example.el")))
+    (save-excursion
+      (with-temp-file file
+        (insert-file-contents user-config-template))))
+  (when openp
+    (find-file file)))
+
+(defun mood-maybe-create-user-config (&optional noprompt openp)
+  "Prompt the user to create config.el from template if it doesn't exist."
+  (let ((user-config-file (join-path user-emacs-directory "config.el")))
+    (when (and (not (file-exists-p user-config-file))
+               (or noprompt
+                   (y-or-n-p "config.el doesn't exist, create it from template?")))
+      (mood-create-user-config-file user-config-file openp)
+      (message "Use M-x mood-reload to apply your settings after editing"))))
+
+(defun mood-open-user-config (&optional force)
+  "Open the user's config.el. If it doesn't exist, create it from
+  the template file in the upstream repo."
+  (interactive "p")
+  (let ((force (and force (> force 1))) ; Single prefix arg
+        (really-force (and force (> force 4))) ; Double prefix arg
+        (user-config-file (join-path user-emacs-directory "config.el")))
+    (if (file-exists-p user-config-file)
+        (cond
+         (really-force (mood-create-user-config-file user-config-file t))
+         (force (if (yes-or-no-p "config.el already exists, overwrite with the template?")
+                    (mood-create-user-config-file user-config-file t)
+                  (find-file user-config-file)))
+         (t (find-file user-config-file)))
+      (mood-maybe-create-user-config force t))))
+
+(defun mood-reload ()
+  "Read the init file again after changing config. This will
+apply new and changed settings, but it will not unload old
+config, so a restart of Emacs might be necessary."
+  (interactive)
+  (load (join-path *mood-elisp-root* "mood.el")))
+
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Load user's config
+;; Bootstrap all the necessary libraries
 
 (unless *mood-no-init-straight*
   (mood-init-straight))
@@ -276,7 +325,14 @@ either a keyword or a plain symbol"
 (straight-use-package 'use-package)
 (straight-use-package 'general)
 
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Load user's config
+
 (mood--ingest-user-config (join-path user-emacs-directory "config.el"))
+
+(mood-maybe-create-user-config nil t)
+
 
 (provide 'mood)
 ;;; mood.el ends here

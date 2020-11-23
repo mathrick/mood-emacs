@@ -1,7 +1,7 @@
 (unless (featurep! -windmove)
   (use-package windmove
     :defer t
-    :config
+    :init
     (let ((modifier (or (featurep! :modifier) 'meta)))
       (loop for (key func) in '((left windmove-left)
                                 (right windmove-right)
