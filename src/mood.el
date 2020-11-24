@@ -15,9 +15,6 @@
 
 ;;; Code:
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Definitions
-
 ;; First things first, we need to get mood-core to load
 
 (let* ((file load-file-name)
@@ -28,21 +25,31 @@
       (load core-file)
     (error "Could not load mood-core.el. mood.el must be located in subdirectory src/ of a checkout. Use (load) in your init file")))
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Bootstrap all the necessary libraries
+(mood--add-mood-to-load-path)
 
-(unless *mood-no-init-straight*
-  (mood-init-straight))
-
-(setq! straight-use-package-by-default t)
-(straight-use-package 'use-package)
-(straight-use-package 'general)
+;; temporarily inhibit GC during startup for small to moderate time savings
+(let ((gc-cons-threshold most-positive-fixnum))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; At this point, we should have everything defined, so let's load the
-;; user's config
+  ;; Bootstrap all the necessary libraries
 
-(mood--ingest-user-config (join-path user-emacs-directory "config.el"))
+  (unless *mood-no-init-straight*
+    (mood-init-straight))
+
+  (setq! straight-use-package-by-default t)
+  (straight-use-package 'use-package)
+  (straight-use-package 'general)
+
+  (require 'mood-keys)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+  ;; At this point, we should have everything defined, so let's load the
+  ;; user's config
+
+  (mood--ingest-user-config (join-path user-emacs-directory "config.el")))
+
+;; GC threshold restored to default
+
 (mood-maybe-create-user-config nil t)
 
 

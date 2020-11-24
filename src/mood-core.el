@@ -27,6 +27,9 @@
         (error "mood.el must be located in subdirectory src/ of a checkout. Use (load) in your init file"))))
   "Directory in which mood.el resides. Should be a checkout of the Mood repo")
 
+(defun mood--add-mood-to-load-path ()
+  (add-to-list 'load-path *mood-elisp-root*))
+
 ;; Ensure we have our core helpers
 (load (concat *mood-elisp-root* "core-lib"))
 (require 'core-lib)
@@ -141,7 +144,7 @@ module)) when a module's definition is being evaluated.")
   `nil'"
   (destructuring-bind (section module) (mood--parse-module-spec section sectionp
                                                             module modulep)
-    (or (car (plist-member (plist-get (plist-get *mood-feature-flags* section) module) flag))
+    (or (second (plist-member (plist-get (plist-get *mood-feature-flags* section) module) flag))
         (when error-if-missing
           (signal 'args-out-of-range
                   (list (format "Flag %s/%s not present" section module)))))))
@@ -154,22 +157,28 @@ module)) when a module's definition is being evaluated.")
                                                             module modulep)
     (let* ((section-plist (plist-get *mood-feature-flags* section))
            (module-plist (plist-get section-plist module)))
-      (setf *mood-feature-flags* (plist-put section-plist module
-                                            (plist-put module-plist flag value))))))
+      (setf *mood-feature-flags*
+            (plist-put *mood-feature-flags* section
+                       (plist-put section-plist module
+                                  (plist-put module-plist flag value)))))))
 
 (cl-defmacro featurep! (section-or-flag
-                        &optional (section nil sectionp) (module nil modulep)
+                        &optional (module nil modulep) (flag nil flagp)
                         error-if-missing)
   "Convenience wrapper around `mood-feature-get' which takes
 positional arguments and quotes them"
-  `(mood-feature-get ',section-or-flag
-             ,@(when sectionp (list :section `(quote ,section)))
-             ,@(when modulep (list :module `(quote ,module)))))
+  `(mood-feature-get ',(if flagp flag section-or-flag)
+                 ,@(when flagp `(:section  ',section-or-flag))
+                 ,@(when modulep `(:module  ',module))))
 
 (defun mood-load-module (section module &optional flags)
   "Load the specified MODULE from SECTION, adding FLAGS to
 `*mood-features-flags*'. SECTION should be a keyword, MODULE
-should be a plain symbol"
+should be a plain symbol.
+
+FLAGS, if set, should be a list of feature flags to pass to the
+module (more exactly, to save in `*mood-features-flags*', under
+the given module's key)."
   (let* ((module-dir (join-path (keyword-or-symbol-name section)
                                 (keyword-or-symbol-name module)))
          (module-path (loop for path in *mood-module-paths*
@@ -179,11 +188,15 @@ should be a plain symbol"
                             finally (error "Module %s/%s not found" section module)))
          (*mood-current-module* (list section module))
          (load-prefer-newer t))
+    (loop for flag in flags
+          do (destructuring-bind (flag &optional (value t)) (ensure-list flag)
+               (mood-feature-put flag :section section :module module :value value)))
     (when (file-exists-p (join-path module-path "packages.el"))
       (load (join-path module-path "packages")))))
 
 (defvar *mood-no-init-straight* nil
-  "If t, Mood will not initialise straight.el. Needs to be set before Mood is loaded")
+  "If t, Mood will not initialise straight.el. Needs to be set
+  before Mood is loaded")
 
 (defvar *mood-straight-use-shallow-clone* t
   "If t (default), straight.el will be set up to use shallow git
@@ -240,7 +253,7 @@ should be a plain symbol"
                  (unless current-section (no-sections module))
                  (setf forms (append forms
                                      (list `(mood-load-module ',current-section ',module
-                                                          ,@flags)))))))
+                                                          ',flags)))))))
           finally return forms)))
 
 ;; This would ordinarily be a horrible hack, since we (read) from a file inside
@@ -290,7 +303,11 @@ create the config if missing."
 
 (defun mood-open-user-config (&optional force)
   "Open the user's config.el. If it doesn't exist, create it from
-  the template file in the upstream repo."
+  the template file in the upstream repo.
+
+With a prefix argument, query the user to overwrite the existing
+config.el with the template. With double prefix argument,
+overwrite it without prompting"
   (interactive "p")
   (let ((force (and force (> force 1))) ; Single prefix arg
         (really-force (and force (> force 4))) ; Double prefix arg
@@ -313,3 +330,7 @@ config, so a restart of Emacs might be necessary."
 
 (provide 'mood-core)
 ;;; mood-core.el ends here
+
+;; Local Variables:
+;; nameless-current-name: "mood"
+;; End:
