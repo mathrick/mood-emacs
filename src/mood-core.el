@@ -126,9 +126,8 @@ module)) when a module's definition is being evaluated.")
         (signal 'wrong-number-of-arguments
                 '("Short form feature spec used, but *mood-current-module* is not bound")))))
 
-(cl-defun mood-feature-get (flag
-                    &key (section nil sectionp) (module nil modulep)
-                    error-if-missing)
+(cl-defun mood-feature-get (&key (section nil sectionp) (module nil modulep)
+                             (flag nil flagp) error-if-missing)
   "Return the value of FLAG in SECTION and MODULE (see
   `*mood-feature-flags*'), or `nil' if not present. If only FLAG
   is given, it is looked up in the current module (as given by
@@ -137,6 +136,8 @@ module)) when a module's definition is being evaluated.")
   If ERROR-IF-MISSING is given, the `args-out-of-range' error will
   be signalled if the flag isn't present, instead of returning
   `nil'"
+  (unless flagp
+    (signal 'wrong-number-of-arguments '("flag is required")))
   (destructuring-bind (section module) (mood--parse-module-spec section sectionp
                                                             module modulep)
     (or (second (plist-member (plist-get (plist-get *mood-feature-flags* section) module) flag))
@@ -144,10 +145,11 @@ module)) when a module's definition is being evaluated.")
           (signal 'args-out-of-range
                   (list (format "Flag %s/%s not present" section module)))))))
 
-(cl-defun mood-feature-put (flag
-                        &key (section nil sectionp) (module nil modulep)
-                        (value t))
+(cl-defun mood-feature-put (&key (section nil sectionp) (module nil modulep)
+                             (flag nil flagp) (value t))
   "Setter counterpart of `mood-feature-get'"
+  (unless flagp
+    (signal 'wrong-number-of-arguments '("flag is required")))
   (destructuring-bind (section module) (mood--parse-module-spec section sectionp
                                                             module modulep)
     (let* ((section-plist (plist-get *mood-feature-flags* section))
@@ -162,9 +164,9 @@ module)) when a module's definition is being evaluated.")
                         error-if-missing)
   "Convenience wrapper around `mood-feature-get' which takes
 positional arguments and quotes them"
-  `(mood-feature-get ',(if flagp flag section-or-flag)
-                 ,@(when flagp `(:section  ',section-or-flag))
-                 ,@(when modulep `(:module  ',module))))
+  `(mood-feature-get ,@(when flagp `(:section  ',section-or-flag))
+                 ,@(when modulep `(:module  ',module))
+                 ':flag ',(if flagp flag section-or-flag)))
 
 (defun mood-load-module (section module &optional flags)
   "Load the specified MODULE from SECTION, adding FLAGS to
@@ -185,7 +187,7 @@ the given module's key)."
          (load-prefer-newer t))
     (loop for flag in flags
           do (destructuring-bind (flag &optional (value t)) (ensure-list flag)
-               (mood-feature-put flag :section section :module module :value value)))
+               (mood-feature-put :section section :module module :flag flag :value value)))
     (when (file-exists-p (join-path module-path "packages.el"))
       (load (join-path module-path "packages")))))
 
@@ -218,9 +220,18 @@ the given module's key)."
 
 (defun mood--parse-init-block (args)
   (cl-flet ((no-sections (module)
-                         (error "Module %s specified before any sections" module)))
-    (loop with forms = ()
-          with forms = ()
+                         (error "Module %s specified before any sections" module))
+            (set-flags (flags section module)
+                       (loop for item in flags
+                             collect (destructuring-bind
+                                         (flag &optional (value t))
+                                         (ensure-list item)
+                                       `(mood-feature-put :section ,section
+                                                      :module ',module
+                                                      :flag ',flag
+                                                      :value ,value)))))
+    (loop with preamble = ()
+          with body = ()
           with current-section = nil
           for arg in args
           do (cond
@@ -233,23 +244,16 @@ the given module's key)."
               ((and (listp arg)
                     (eq (car arg) nil))
                (unless current-section (no-sections "<nil pseudo-module>"))
-               (setf forms (append forms
-                                   (loop for item in (cdr arg)
-                                         collect (destructuring-bind
-                                                     (flag &optional (value t))
-                                                     (ensure-list item)
-                                                   `(mood-feature-put ,flag
-                                                                  :section ,current-section
-                                                                  :module nil
-                                                                  :value ,value))))))
+               (setf preamble (append preamble (set-flags (cdr arg) current-section nil))))
               ((or (listp arg)
                    (symbolp arg))
                (destructuring-bind (module &rest flags) (ensure-list arg)
                  (unless current-section (no-sections module))
-                 (setf forms (append forms
-                                     (list `(mood-load-module ',current-section ',module
-                                                          ',flags)))))))
-          finally return forms)))
+                 (setf preamble (append preamble (set-flags (append flags '(:enabled))
+                                                            current-section module)))
+                 (setf body (append body
+                                     `((mood-load-module ',current-section ',module)))))))
+          finally return `(,@preamble ,@body))))
 
 ;; This would ordinarily be a horrible hack, since we (read) from a file inside
 ;; a macro, but init code is a pretty special case and this makes it easier to

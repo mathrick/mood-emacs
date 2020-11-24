@@ -10,12 +10,16 @@
   (use-package windmove
     :defer t
     :init
-    (let ((modifier (or (featurep! :modifier) 'meta)))
-      (loop for (key func) in '((left windmove-left)
-                                (right windmove-right)
-                                (up windmove-up)
-                                (down windmove-down))
-            do (general-define-key (vector (list modifier key)) func)))))
+    (destructuring-bind (section module) *mood-current-module*
+      (let ((modifier (or (featurep! :windmove-modifier) 'meta)))
+        ;; FIXME: Store what we selected. Need better system for default values
+        (mood-feature-put :section section :module module
+                          :flag :windmove-modifier :value modifier)
+        (loop for (key func) in '((left windmove-left)
+                                  (right windmove-right)
+                                  (up windmove-up)
+                                  (down windmove-down))
+              do (general-define-key (vector (list modifier key)) func))))))
 
 ;; CUA (https://en.wikipedia.org/wiki/IBM_Common_User_Access) mode
 ;; provides the CUA keys, as well as things like Shift-movement for
