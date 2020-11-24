@@ -1,8 +1,53 @@
 ;; -*- lexical-binding: t; -*-
 
+(let ((-strict (featurep! -strict))
+      (style (case (featurep! :style)
+               ((nil t) 'paredit)
+               ('sp 'sp)
+               (otherwise (error "Unknown smartparens style: %s" (featurep! :style)))))
+      (extra-keybindings (featurep! :keys)))
+  (use-package smartparens-config
+    :straight smartparens
+    ;; This is an ugly hack, but sp-override-key-bindings doesn't work
+    ;; if set during init for some reason, so we're "deferring" it until
+    ;; afterwards
+    :defer 0
+    :config
+    (setq! sp-base-key-bindings style)
+    ;; Unset SP's default keys that clash with other things we set
+    (let* ((windmove (unless (featurep! :ui defaults -windmove)
+                       (featurep! :ui defaults :windmove-modifier)))
+           (cua (not (featurep! :ui defaults -cua)))
+           (unset `(,@(when windmove
+                        ;; sp-override-key-bindings requires strings
+                        ;; in (kbd) notation
+                        (loop for key in '(up down)
+                              collect (cons (key-description (vector (list windmove key)))
+                                            nil)))
+                    ,@(when cua
+                        '(("C-<right>" . nil)
+                          ("C-<left>"  . nil))))))
 
-(let ((-strict (featurep! -strict)))
-  (use-package smartparens
-    :config (if -strict
+        (setq! sp-override-key-bindings
+            (case style
+              ('paredit
+               `(,@unset
+
+                 ("C-M-<right>" . sp-forward-sexp) ;; navigation
+                 ("C-M-<left>"  . sp-backward-sexp)
+                 ("C-M-<up>"    . sp-backward-up-sexp)
+                 ("C-M-<down>"  . sp-down-sexp)
+                 ("ESC <up>"    . sp-splice-sexp-killing-backward)
+                 ("M-S-<up>"    . sp-splice-sexp-killing-backward)
+                 ("ESC <down>"  . sp-splice-sexp-killing-forward)
+                 ("M-S-<down>"  . sp-splice-sexp-killing-forward)
+                 ("M-?"         . sp-convolute-sexp)
+
+                 ("M-(" . (lambda ()
+                            (interactive)
+                            (sp-wrap-with-pair "(")))))
+              ;; FIXME: do we need any extras like with paredit style?
+              ('sp unset))))
+    (if -strict
                 (smartparens-global-mode)
               (smartparens-global-strict-mode))))
