@@ -15,6 +15,9 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Definitions
 
+(require 'core-lib)
+(require 'cl)
+
 (defvar *mood-elisp-root*
   (if (getenv "MOOD_ELISP_ROOT")
       (expand-file-name (concat (getenv "MOOD_ELISP_ROOT") "/"))
@@ -26,14 +29,6 @@
           mydir
         (error "mood.el must be located in subdirectory src/ of a checkout. Use (load) in your init file"))))
   "Directory in which mood.el resides. Should be a checkout of the Mood repo")
-
-(defun mood--add-mood-to-load-path ()
-  (add-to-list 'load-path *mood-elisp-root*))
-
-;; Ensure we have our core helpers
-(load (concat *mood-elisp-root* "core-lib"))
-(require 'core-lib)
-(require 'cl)
 
 (defvar *mood-checkout-root* (file-parent-directory *mood-elisp-root*)
   "Root directory of the Mood checkout, ie. the directory

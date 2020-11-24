@@ -15,20 +15,24 @@
 
 ;;; Code:
 
-;; First things first, we need to get mood-core to load
+;; First things first, we need to get our load path to be able to find
+;; the rest of Mood
 
 (let* ((file load-file-name)
        (symlink (file-symlink-p file))
        (mydir (file-name-directory (or symlink file)))
        (core-file (expand-file-name "mood-core.el" mydir)))
   (if (file-exists-p core-file)
-      (load core-file)
-    (error "Could not load mood-core.el. mood.el must be located in subdirectory src/ of a checkout. Use (load) in your init file")))
+      (progn
+        (add-to-list 'load-path  mydir)
+        (add-to-list 'load-path (expand-file-name "../src" mydir)))
 
-(mood--add-mood-to-load-path)
+    (error "Could not locate mood-core.el. mood.el must be located in subdirectory src/ of a checkout. Use (load) in your init file")))
 
 ;; temporarily inhibit GC during startup for small to moderate time savings
 (let ((gc-cons-threshold most-positive-fixnum))
+
+  (require 'mood-core)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
   ;; Bootstrap all the necessary libraries

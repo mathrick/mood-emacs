@@ -12,11 +12,12 @@
 
 ;;; Code:
 
-;; This still needs work, don't user for now
+;; This still needs work, don't use for now
 (defun mood-defered-key-thunk (key command)
   (general-lambda ()
     (funcall-interactively command)
-    (general-simulate-key key)))
+    ;; (general-simulate-key key)
+    ))
 
 (provide 'mood-keys)
 ;;; mood-keys.el ends here
