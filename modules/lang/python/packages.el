@@ -12,7 +12,8 @@
       (when company-enabled
         (use-package company-anaconda
           :after (company anaconda-mode)
-          :config (add-to-list 'company-backends 'company-anaconda))))))
+          :config (add-to-list 'company-backends
+                               '(company-anaconda :with company-capf)))))))
 
 (unless (featurep! -pyenv)
   (use-package pyenv-mode
