@@ -74,13 +74,22 @@
 ;; also in vertically split windows
 (setq! truncate-partial-width-windows nil)
 
-(unless (featurep! -file-history)
-  ;; Remember the last position in previously visited files
-  (use-package saveplace
-    :config (save-place-mode t))
+(unless (featurep! -parens)
+  ;;; Parens and cursor
+  (use-package paren
+    :config
+    (show-paren-mode)
+    (setq blink-matching-paren nil)))
 
-  (use-package recentf
-    :config (recentf-mode)))
+;; CamelCase is a bit tedious to read, this helps with that
+(unless (featurep! -glasses)
+  (use-package glasses
+    :config
+    (setq! glasses-face 'bold)
+    (setq! glasses-original-separator "")
+    (setq! glasses-separator "")
+    (setq! glasses-separate-parentheses-p nil)
+    :hook (prog-mode . glasses-mode)))
 
 ;; Show a nice cheat sheet for available keys
 (unless (featurep! -which-key)

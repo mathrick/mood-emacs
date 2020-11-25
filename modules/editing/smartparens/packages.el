@@ -1,6 +1,7 @@
 ;; -*- lexical-binding: t; -*-
 
 (let ((-strict (featurep! -strict))
+      (-parens (featurep! -parens))
       (style (case (featurep! :style)
                ((nil t) 'paredit)
                ('sp 'sp)
@@ -49,5 +50,10 @@
               ;; FIXME: do we need any extras like with paredit style?
               ('sp unset))))
     (if -strict
-                (smartparens-global-mode)
-              (smartparens-global-strict-mode))))
+        (smartparens-global-mode)
+      (smartparens-global-strict-mode))
+    (unless (or (featurep! :ui defaults -parens)
+                -parens)
+      (use-package smartparens-config
+        :straight nil
+        :config (show-smartparens-global-mode)))))
