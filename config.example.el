@@ -8,12 +8,12 @@
 
        :ui                    ;; General appearance and behaviour
        defaults               ;; Things we can all agree make sense
-       ;(defaults (:font "monofur for Powerline 10"))
        (scrollbars +yascroll) ;; Fancy scrollbars, or minimap, or whatever
        undo                   ;; Less confusing undo system
        ;(undo +fu +session)   ;; (undo-tree by default, but you can choose undo-fu)
        doom-modeline          ;; Shinier modeline
        (icomplete +vertical)  ;; The unsurprising minibuffer completion
+       ;(defaults :font "monofur for Powerline 10")
 
        :editing               ;; It's not an emacsitor!
        ;company               ;; It's dangerous to type alone

@@ -1,12 +1,10 @@
 ;; -*- lexical-binding: t; -*-
 
 (let ((-strict (featurep! -strict))
-      (-parens (featurep! -parens))
-      (style (case (featurep! :style)
-               ((nil t) 'paredit)
-               ('sp 'sp)
-               (otherwise (error "Unknown smartparens style: %s" (featurep! :style)))))
-      (extra-keybindings (featurep! :keys)))
+      (-parens (featurep! -highlight))
+      (style  (featurep! :style)))
+  (unless (memq style '(paredit sp))
+    (error "Unknown smartparens style: %s" style))
   (use-package smartparens-config
     :straight smartparens
     ;; This is an ugly hack, but sp-override-key-bindings doesn't work
@@ -16,8 +14,7 @@
     :config
     (setq! sp-base-key-bindings style)
     ;; Unset SP's default keys that clash with other things we set
-    (let* ((windmove (unless (featurep! :ui defaults -windmove)
-                       (featurep! :ui defaults :windmove-modifier)))
+    (let* ((windmove (featurep! :ui defaults :windmove))
            (cua (not (featurep! :ui defaults -cua)))
            (unset `(,@(when windmove
                         ;; sp-override-key-bindings requires strings

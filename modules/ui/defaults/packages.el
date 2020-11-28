@@ -11,10 +11,7 @@
     :defer t
     :init
     (destructuring-bind (section module) *mood-current-module*
-      (let ((modifier (or (featurep! :windmove-modifier) 'meta)))
-        ;; FIXME: Store what we selected. Need better system for default values
-        (mood-feature-put :section section :module module
-                          :flag :windmove-modifier :value modifier)
+      (let ((modifier (featurep! :windmove)))
         (loop for (key func) in '((left windmove-left)
                                   (right windmove-right)
                                   (up windmove-up)
