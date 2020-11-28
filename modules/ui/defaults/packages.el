@@ -32,7 +32,7 @@
 (unless (featurep! -cua)
   ;; Short form of (featurep! ...) won't work by the time :config
   ;; runs, so save the value here
-  (let ((keys (featurep! +cua-keys)))
+  (let ((keys (eq (featurep! :cua) 'keys)))
     (use-package cua-base
      :defer 0
      :config
@@ -71,22 +71,9 @@
 ;; also in vertically split windows
 (setq! truncate-partial-width-windows nil)
 
-(unless (featurep! -parens)
-  ;;; Parens and cursor
-  (use-package paren
-    :config
-    (show-paren-mode)
-    (setq blink-matching-paren nil)))
-
-;; CamelCase is a bit tedious to read, this helps with that
-(unless (featurep! -glasses)
-  (use-package glasses
-    :config
-    (setq! glasses-face 'bold)
-    (setq! glasses-original-separator "")
-    (setq! glasses-separator "")
-    (setq! glasses-separate-parentheses-p nil)
-    :hook (prog-mode . glasses-mode)))
+(use-package wdired
+  :general ('dired-mode-map
+	    "r" #'wdired-change-to-wdired-mode))
 
 ;; Show a nice cheat sheet for available keys
 (unless (featurep! -which-key)
@@ -96,6 +83,13 @@
 ;; Nicer help functions
 (unless (featurep! -helpful)
   (use-package helpful
+    :init
+    (advice-add 'describe-function :override #'helpful-callable)
+    (advice-add 'describe-variable :override #'helpful-variable)
+    (advice-add 'describe-command  :override #'helpful-callable)
+    (advice-add 'describe-key      :override #'helpful-key)
+    (advice-add 'describe-symbol   :override #'helpful-symbol)
+
     :general
     ([remap describe-function] #'helpful-callable)
     ([remap describe-variable] #'helpful-variable)

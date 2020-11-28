@@ -49,7 +49,7 @@
     (if -strict
         (smartparens-global-mode)
       (smartparens-global-strict-mode))
-    (unless (or (featurep! :ui defaults -parens)
+    (unless (or (featurep! :editing defaults -parens)
                 -parens)
       (use-package smartparens-config
         :straight nil

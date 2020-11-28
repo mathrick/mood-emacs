@@ -1,29 +1,34 @@
-(init! :base                  ;; Base OS, Emacs and Mood config. You probably want all of them
-       os-support             ;; Make working on Windows suck less
-       defaults               ;; You want them
+(init! :base				;; Base OS, Emacs and Mood config. You probably want all of them
+       defaults				;; You want them
+       os-support			;; Make working on Windows suck less
 
-       :theme                 ;; A fresh coat of paint
-       ;zenburn               ;; The original dark theme
-       doom-themes            ;; Great artists steal
+       :theme				;; A fresh coat of paint
+       doom-themes			;; Great artists steal
+       ;zenburn				;; The original dark theme
 
-       :ui                    ;; General appearance and behaviour
-       defaults               ;; Things we can all agree make sense
-       (scrollbars +yascroll) ;; Fancy scrollbars, or minimap, or whatever
-       undo                   ;; Less confusing undo system
-       ;(undo +fu +session)   ;; (undo-tree by default, but you can choose undo-fu)
-       doom-modeline          ;; Shinier modeline
-       (icomplete +vertical)  ;; The unsurprising minibuffer completion
+       :ui				;; General appearance and behaviour
+       defaults				;; Things we can all agree make sense
        ;(defaults :font "monofur for Powerline 10")
+       ;EXPERIMENTAL: auto-dim		;; I want to know where to look
+       doom-modeline			;; Shinier modeline
+       (icomplete +vertical)		;; The unsurprising minibuffer completion
+       (scrolling +yascroll +smooth)	;; I held out for 20 years, but I'll finally admit it: Emacs scrollbars look hideous with any decent theme
+       undo				;; Less confusing undo system
+       ;(undo +fu +session)		;; (undo-tree by default, but you can choose undo-fu)
 
-       :editing               ;; It's not an emacsitor!
-       ;company               ;; It's dangerous to type alone
-       smartparens            ;; Nobody likes counting 'em
-       multiple-cursors       ;; Trust me, you want this
+       :editing				;; It's not an emacsitor!
+       defaults				;; Basic quality of life improvements
+       company				;; It's dangerous to type alone
+       expand-region			;; Make 'em bigger
+       multiple-cursors			;; Trust me, you want this
+       smartparens			;; Nobody likes counting 'em
+       visual-regexp			;; Not for parsing HTML
 
-       :vcs                   ;; Git, Bazaar, Hg, and others
-       ;magit                 ;; Honestly, don't even bother with git otherwise
+       :vcs				;; Git, Bazaar, Hg, and others
+       magit				;; Honestly, don't even bother with git otherwise
 
-       :lang                  ;; Languages, of the programming kind
-       elisp                  ;; This is Emacs, after all
-       ;python                ;; And the flying circus
+       :lang				;; Languages, of the programming kind
+       (elisp +nameless)		;; This is Emacs, after all
+       org				;; The all-singing, all-dancing organiser
+       ;python				;; And the flying circus
        )

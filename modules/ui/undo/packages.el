@@ -10,4 +10,10 @@
           :after undo-fu
           :config (global-undo-fu-session-mode))))
   (use-package undo-tree
-    :config (global-undo-tree-mode)))
+    :config
+    ;; Undo conflicting bindings
+    (when (featurep! :editing expand-region :enabled)
+      (general-unbind undo-tree-map "C-?"))
+    (when (featurep! :editing smartparens :enabled)
+      (general-unbind undo-tree-map "M-?"))
+    (global-undo-tree-mode)))
