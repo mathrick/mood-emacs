@@ -120,7 +120,7 @@ The basic installation steps are as follows:
    startup](https://www.gnu.org/software/emacs/manual/html_node/emacs/Init-File.html).
    Give it the following contents:
    ```
-   (load "<mood root>/src/mood")
+   (load "<mood root>/mood")
    ```
    * If you're using [Chemacs](https://github.com/plexus/chemacs),
      which is an excellent and recommended way to switch between

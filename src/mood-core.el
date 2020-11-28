@@ -1,4 +1,4 @@
-;;; mood-core.el --- Mood, the modular Emacs config that isn't Doom -*- lexical-binding: t; -*-
+;; mood-core.el --- Mood, the modular Emacs config that isn't Doom -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2020  Maciej Katafiasz
 
@@ -45,7 +45,7 @@
   (let ((os (cond
              ((string-equal "gnu/linux" system-type)  "linux")
              ((string-equal "darwin"    system-type)  "darwin")
-             ((string-equal "windows"   system-type)  "windows")
+             ((string-equal "windows-nt"   system-type)  "windows")
              (t (warn (format "Mood: Unknown OS type %s" system-type))
                 "unknown"))))
     (list :os (make-keyword os))))
@@ -449,7 +449,7 @@ overwrite it without prompting"
 apply new and changed settings, but it will not unload old
 config, so a restart of Emacs might be necessary."
   (interactive)
-  (load (join-path *mood-elisp-root* "mood.el")))
+  (load (join-path *mood-elisp-root* "../mood.el")))
 
 (provide 'mood-core)
 ;;; mood-core.el ends here

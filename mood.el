@@ -21,13 +21,13 @@
 (let* ((file load-file-name)
        (symlink (file-symlink-p file))
        (mydir (file-name-directory (or symlink file)))
-       (core-file (expand-file-name "mood-core.el" mydir)))
+       (core-file (expand-file-name "src/mood-core.el" mydir)))
   (if (file-exists-p core-file)
       (progn
         (add-to-list 'load-path  mydir)
-        (add-to-list 'load-path (expand-file-name "../src" mydir)))
+        (add-to-list 'load-path (expand-file-name "src" mydir)))
 
-    (error "Could not locate mood-core.el. mood.el must be located in subdirectory src/ of a checkout. Use (load) in your init file")))
+    (error "Could not locate src/mood-core.el. mood.el must be located inside a checkout. Use a symlink or (load) in your init file")))
 
 ;; temporarily inhibit GC during startup for small to moderate time savings
 (let ((gc-cons-threshold most-positive-fixnum))
