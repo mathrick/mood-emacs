@@ -1,12 +1,16 @@
 > This is my config framework. There are many like it, but this one is mine.
 
-<!-- markdown-toc start - Don't edit this section. Run M-x markdown-toc-generate-toc again -->
+<!-- markdown-toc start - Don't edit this section. Run M-x markdown-toc-refresh-toc -->
 **Table of Contents**
 
 - [Intro](#intro)
     - [Goals](#goals)
-- [Installation](#installation)
 - [Usage](#usage)
+    - [Before you start](#before-you-start)
+        - [Windows-specific configuration](#windows-specific-configuration)
+        - [Using Chemacs](#using-chemacs)
+    - [Installation](#installation)
+    - [Configuration](#configuration)
 - [FAQ](#faq)
 
 <!-- markdown-toc end -->
@@ -53,7 +57,7 @@ pieces of Doom while fixing things that are problems to me.
 Goals
 -----
 
-The goals of Mood are as follows, in order of importance:
+The goals of Mood are as follows, in rough order of importance:
 
 1. Works for me and does what I want without undue pain. At the end of
    the day, it's my config and that's my primary goal. I try not to
@@ -62,37 +66,72 @@ The goals of Mood are as follows, in order of importance:
    decisions that suit me primarily.
 2. Modular and with a minimum of hardcoded choices that can't be
    changed. As long as #1 can be satisfied, I try to keep unrelated
-   concerns separate and independent. As much as possible, integration
-   and polish will be provided by using glue packages loaded
-   conditionally when apporiate, rather than assumptions about what
-   else will be used.
-3. Reasonably broad chunks of functionality with sane defaults and
-   functionality out of the box. Whilst occasionally certain things
-   might require knobs to provide sufficient flexibility, in general
-   the aim is to have the modules provide a significant amount of
-   functionality simply by being enabled.
-4. Well-documented and readable. The project is extremely young at the
+   concerns separate and independent.
+3. Portable. It should be trivial to move to another machine and start
+   using Emacs there simply by cloning your personal config repo. No
+   changes should be necessary to make it work. It should also be easy
+   to use it on Windows, although POSIX is the primary OS family
+   targeted.
+4. Easy to select reasonably broad chunks of configuration with sane
+   defaults and functionality out of the box. Whilst occasionally
+   certain things might require finer knobs to provide sufficient
+   flexibility, in general modules should only need to be enabled to
+   start working in a way the user expects.
+5. Well-documented and readable. The project is extremely young at the
    moment, and still lacking in this regard, but good documentation
    and readable code are something to strive for.
-5. Fast. Speed during normal use is more important than initalisation
+6. Fast. Speed during normal use is more important than initalisation
    or bootstrap speed, but neither should be needlessly
    compromised. Things that might lead to unacceptable performance
    under specific circumstances (e.g. when using TRAMP) should be easy
    to disable.
-6. Aesthetically pleasing and functionally modern. I'm not too worried
+7. Aesthetically pleasing and functionally modern. I'm not too worried
    about winning screenshot contests against Atom & friends, but
    there's no reason not to have a smart editor that can reasonably
    compete against IDEs in terms of functionality provided, and be
    pretty to look at
 
+Usage
+=====
+
+Before you start
+----------------
+
+### Windows-specific configuration
+
+_Note: Mood has been tested on Windows 7, using native builds from
+GNU.org. Using Cygwin or Win10 with WSL will require adjustments_
+
+* Set up your HOME, as the default location is rather silly. Right
+  click on *Computer* → *Properties* → *Advanced system settings*
+
+	Click on `New...` user variable. Call it `HOME`, and give it the
+	value of `%USERPROFILE%`. This will make it point to your user
+	folder (to access it through the file explorer, navigate to
+	Desktop in the file explorer, then click the arrow in the address
+	bar and select your user folder from the dropdown list).
+
+	Below `~/` refers to the home directory you've just set up.
+
+
+### Using Chemacs
+
+[Chemacs](https://github.com/plexus/chemacs) is recommended. Chemacs
+provides an easy way to switch between multiple profiles, and even if
+you only use one profile, it makes it much easier to put Emacs config
+files in an arbitrary location. If you decide to use Chemacs, follow
+its installation instructions first. Afterwards, set up a profile
+(either dedicated or `default`) in `~/.emacs-profiles.el` that points to
+your `<user root>` from step 2 below:
+
+```
+(("default" . ((user-emacs-directory . "~/.emacs.d")))
+ ("mood" . ((user-emacs-directory . "~/elisp"))))
+```
+
+
 Installation
-============
-
-__________________
-**NOTE**: This section is very incomplete. More to come
-__________________
-
-The basic installation steps are as follows:
+------------
 
 1. Clone this repository somewhere. For me, this is `~/Dev/mood-emacs/`:
    ```
@@ -100,44 +139,59 @@ The basic installation steps are as follows:
    $ git clone https://github.com/mathrick/mood-emacs
    ```
    This location will be referred to as `<mood root>` from now on.
-   
-   **NOTE**: This is _not_ the same as your Emacs config dir! See next step.
+
+   **NOTE**: This is _not_ the same as your Emacs config dir! See the
+   next step.
 
 2. Create a directory where your Mood-powered Emacs config will
    live. This can either be the standard location (`~/.emacs.d/`), or
    somewhere else. For me, it's `~/elisp`.
+
    ```
    $ mkdir ~/elisp
-   $ git init ~/elisp
+   $ cd ~/elisp; git init && git ignore mood.el # optional but recommended
    ```
+
    This location will be referred to as `<user root>` from now on.
-   
+
    **NOTE**: It is **strongly recommended** to keep your config under
    version control. It doesn't need to be git, but it should be a
-   version control tool you're comfortable with.
+   version control tool you're comfortable with. After you initialise
+   the repo, you should add the file `mood.el` to the ignore list.
 
-3. Create an init file. It can be any of the [files Emacs will read on
-   startup](https://www.gnu.org/software/emacs/manual/html_node/emacs/Init-File.html).
-   Give it the following contents:
+3. Pick a location for your init file. It can be any of the [files
+   Emacs will read on startup](https://www.gnu.org/software/emacs/manual/html_node/emacs/Init-File.html).
+   Either symlink or copy `<mood root>/init.example.el` to it:
+
    ```
-   (load "<mood root>/mood")
+   $ ln -s ~/Dev/mood-emacs/init.example.el ~/elisp/init.el
    ```
-   * If you're using [Chemacs](https://github.com/plexus/chemacs),
-     which is an excellent and recommended way to switch between
-     configs and try out new frameworks for your Emacs, the init file
-     **must be** `<user root>/init.el`, since Chemacs already resides
-     in `~/.emacs`. Afterwards, create a new profile for Mood in
-     `~/.emacs-profiles.el`:
-     
-     ```
-     (("default" . ((user-emacs-directory . "~/.emacs.d")))
-      ("mood" . ((user-emacs-directory . "~/elisp"))))
-     ```
-4. Start Emacs. If using Chemacs, start it with the newly created profile:
+
+   or
+
    ```
+   $ cp ~/Dev/mood-emacs/init.example.el ~/.emacs.d/init.el
+   ```
+
+   * If you're using Chemacs, the init file **must be** `<user root>/init.el`, 
+	 since Chemacs already resides in `~/.emacs`
+
+   * On Windows, symlinks are not well-supported, so copying is necessary
+	 
+
+4. Start Emacs. If using Chemacs, start it with the newly created
+   profile:
+   
+   ``` 
    emacs --with-profile mood
-   ```
-   This will bootstrap [`straight.el`](https://github.com/raxod502/straight.el)
+   ``` 
+   
+   Emacs will prompt you to enter the location of Mood checkout
+   (ie. `<mood root>`), and use that create a loader stub under `<user
+   root>/mood.el`. The stub makes it easier to make your config
+   machine-independent, and should not be checked into your VCS.
+
+   Next, it will bootstrap [`straight.el`](https://github.com/raxod502/straight.el) 
    and install the required libraries (Internet connection is
    necessary). Depending on your connection speed, it might take a
    while, but Mood configures `straight.el` to minimise the badwidth
@@ -157,8 +211,8 @@ The basic installation steps are as follows:
 
 6. Congratulations! Your Emacs is now ready to use.
 
-Usage
-=====
+Configuration
+-------------
 
 _FIXME_
 
