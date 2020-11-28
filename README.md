@@ -15,7 +15,7 @@
 Intro
 =====
 
-This is Mood, a modular Emacs config that isn't Doom.
+This is Mood, a modular Emacs config inspired by Doom.
 
 I wrote Mood after I tried (and ultimately failed) to use my [previous
 config](https://github.com/mathrick/emacs-config) with [Doom
@@ -37,20 +37,18 @@ of preconfigured modules that take out the tedium and provide a nice,
 shiny-looking Emacs full of modern conveniences. Where Doom and I
 didn't really agree is the actual implementation.
 
-It makes some choices that are cumbersome (`bin/doom sync`, which also
-makes it very tricky to install in non-standard locations),
-non-standard and confusing (popups library), and hardcoded in the core
-config and impossible to disable (`winner.el`). It ships with lots and
-lots of modules that are shiny, but also had some bad interactions
-that made it literally impossible to use over TRAMP because it'd
-freeze, and others that make buffer switching unpredictable.
+It makes some choices I find cumbersome (`bin/doom sync`, which also
+makes it very tricky to install in non-standard locations), some that
+are non-standard and confusing (popups library), and hardcoded in the
+core config and impossible to disable (`winner.el`). It ships with
+lots and lots of modules that are shiny, but also had some bad
+interactions that made it literally impossible to use over TRAMP
+because it'd freeze, and others that make buffer switching
+unpredictable.
 
-None of the above is to say that Doom is _bad_. It's not, it's a
-well-liked, polished, and flexible framework with plenty of great
-ideas and code. But I've been using Emacs for 20+ years and I expect
-certain things to behave a particular way, and Doom just doesn't work
-for me. Mood is my attempt at stealing the best pieces of Doom while
-fixing things that are problems to me.
+So I did what any self-respecting Lisp hacker would do, and figured
+I'd have a crack at it myself. Mood is my attempt at stealing the best
+pieces of Doom while fixing things that are problems to me.
 
 Goals
 -----
@@ -61,11 +59,7 @@ The goals of Mood are as follows, in order of importance:
    the day, it's my config and that's my primary goal. I try not to
    impose gratuitous decisions and make things as modular as I can,
    but if something is too hard to make generic, I might make
-   decisions that suit me primarily. It's a double standard to be
-   sure, considering what I said about Doom not being flexible enough,
-   but I'd be shocked to find out that
-   [hlissner](https://github.com/hlissner/) didn't find Doom
-   convenient :)
+   decisions that suit me primarily.
 2. Modular and with a minimum of hardcoded choices that can't be
    changed. As long as #1 can be satisfied, I try to keep unrelated
    concerns separate and independent. As much as possible, integration
@@ -157,7 +151,9 @@ The basic installation steps are as follows:
 5. At the end of the bootstrap, Mood will prompt to create the
    `config.el` file from template. Answer `y` to that, then edit the
    default config to your liking. When you're done, run `M-x
-   mood-reload` or restart Emacs.
+   mood-reload` or restart Emacs. There will be some delay as straight
+   installs the packages you selected, but again, that will only
+   happen once.
 
 6. Congratulations! Your Emacs is now ready to use.
 
