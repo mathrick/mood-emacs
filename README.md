@@ -187,8 +187,8 @@ Installation
    ``` 
    
    Emacs will prompt you to enter the location of Mood checkout
-   (ie. `<mood root>`), and use that create a loader stub under `<user
-   root>/mood.el`. The stub makes it easier to make your config
+   (ie. `<mood root>`), and use that to create a loader stub under
+   `<user root>/mood.el`. The stub makes it easier to make your config
    machine-independent, and should not be checked into your VCS.
 
    Next, it will bootstrap [`straight.el`](https://github.com/raxod502/straight.el) 
