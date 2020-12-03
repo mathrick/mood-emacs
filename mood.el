@@ -54,6 +54,7 @@
 
 ;; GC threshold restored to default
 
+(require 'mood-ui)
 (mood-maybe-create-user-config nil t)
 
 

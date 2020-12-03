@@ -216,6 +216,33 @@ positional arguments and quotes them"
           return candidate
           finally (error "Module %s/%s not found" section module))))
 
+(defun mood-known-modules ()
+  "Return the list of all modules that are known, ie. exist on
+  the filesystem and would be a valid argument for
+  `mood-find-module'. The return value is a list of three-element lists:
+
+  ((:section1 module1 path) (:section2 module2 path) ...)
+
+  where PATH is an element of `*mood-module-paths*'"
+  (let ((valid-name-regexp (rx bol
+			       (+ (or wordchar "-"))
+			       eol)))
+   (cl-flet ((valid-name-p (parent name)
+			   (and (file-directory-p (join-path parent name))
+				(string-match-p valid-name-regexp name))))
+     (loop for path in *mood-module-paths*
+	   when (file-exists-p path)
+	   nconc
+	   (loop for section in (directory-files path)
+		 for section-path = (join-path path section)
+		 if (valid-name-p path section)
+		 nconc
+		 (loop for module in (directory-files section-path)
+		       if (valid-name-p section-path module)
+		       collect (list (make-keyword section)
+				     (intern module)
+				     path)))))))
+
 (defun mood-load-module (section module &optional flags)
   "Load the specified MODULE from SECTION, adding FLAGS to
 `*mood-features-flags*'. SECTION should be a keyword, MODULE
@@ -399,57 +426,6 @@ being `nil'."
      ((string-prefix-p "-" name) (list (make-keyword (substring name 1))
                                        t '-))
      (t (list flag nil nil)))))
-
-(defun mood-create-user-config-file (file &optional openp)
-  "Create user config from template, write it to FILE. If OPENP
-  is given, `find-file' will be called on the created file.
-
-WARNING: This will *overwrite* existing files, see
-`mood-maybe-create-user-config' and `mood-open-user-config' for a
-safer, interactive alternative that will prompt the user to
-create the config if missing."
-  (let ((user-config-template (join-path *mood-checkout-root* "config.example.el")))
-    (save-excursion
-      (with-temp-file file
-        (insert-file-contents user-config-template))))
-  (when openp
-    (find-file file)))
-
-(defun mood-maybe-create-user-config (&optional noprompt openp)
-  "Prompt the user to create config.el from template if it doesn't exist."
-  (let ((user-config-file (join-path user-emacs-directory "config.el")))
-    (when (and (not (file-exists-p user-config-file))
-               (or noprompt
-                   (y-or-n-p "config.el doesn't exist, create it from template?")))
-      (mood-create-user-config-file user-config-file openp)
-      (message "Use M-x mood-reload to apply your settings after editing"))))
-
-(defun mood-open-user-config (&optional force)
-  "Open the user's config.el. If it doesn't exist, create it from
-  the template file in the upstream repo.
-
-With a prefix argument, query the user to overwrite the existing
-config.el with the template. With double prefix argument,
-overwrite it without prompting"
-  (interactive "p")
-  (let ((force (and force (> force 1))) ; Single prefix arg
-        (really-force (and force (> force 4))) ; Double prefix arg
-        (user-config-file (join-path user-emacs-directory "config.el")))
-    (if (file-exists-p user-config-file)
-        (cond
-         (really-force (mood-create-user-config-file user-config-file t))
-         (force (if (yes-or-no-p "config.el already exists, overwrite with the template?")
-                    (mood-create-user-config-file user-config-file t)
-                  (find-file user-config-file)))
-         (t (find-file user-config-file)))
-      (mood-maybe-create-user-config force t))))
-
-(defun mood-reload ()
-  "Read the init file again after changing config. This will
-apply new and changed settings, but it will not unload old
-config, so a restart of Emacs might be necessary."
-  (interactive)
-  (load (join-path *mood-elisp-root* "../mood.el")))
 
 (provide 'mood-core)
 ;;; mood-core.el ends here
