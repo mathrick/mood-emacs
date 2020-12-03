@@ -7,6 +7,7 @@
        ;zenburn				;; The original dark theme
 
        :ui				;; General appearance and behaviour
+       mood				;; Mood at your fingertips
        defaults				;; Things we can all agree make sense
        ;(defaults :font "monofur for Powerline 10")
        ;EXPERIMENTAL: auto-dim		;; I want to know where to look
