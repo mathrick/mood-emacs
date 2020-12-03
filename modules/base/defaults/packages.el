@@ -1,5 +1,9 @@
 ;; -*- lexical-binding: t; -*-
 
+;; This is rarely necessary on Linux these days, but still needed for
+;; Windows
+(set-language-environment "UTF-8")
+
 ;; By default, custom settings are simply discarded, since they only
 ;; serve to mess up the predictable results of what we're doing here
 (if (featurep! +keep-custom)
