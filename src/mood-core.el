@@ -273,10 +273,8 @@ the given module's key)."
 (defun mood-init-straight ()
   "Initialise straight.el"
   (defvar bootstrap-version)
-  (defvar straight-vc-git-default-clone-depth)
-  (let* ((straight-vc-git-default-clone-depth
-          (if *mood-straight-use-shallow-clone* 1 'full))
-         (bootstrap-file
+  (defvar straight-vc-git-default-clone-depth (if *mood-straight-use-shallow-clone* 1 'full))
+  (let* ((bootstrap-file
           (expand-file-name "straight/repos/straight.el/bootstrap.el" user-emacs-directory))
          (bootstrap-version 5))
     (unless (file-exists-p bootstrap-file)
