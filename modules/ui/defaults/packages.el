@@ -87,14 +87,37 @@
 ;; Nicer help functions
 (unless (featurep! -helpful)
   (use-package helpful
-    :init
-    (advice-add 'describe-function :override #'helpful-callable)
-    (advice-add 'describe-variable :override #'helpful-variable)
-    (advice-add 'describe-command  :override #'helpful-callable)
-    (advice-add 'describe-key      :override #'helpful-key)
-    (advice-add 'describe-symbol   :override #'helpful-symbol)
-
     :general
     ([remap describe-function] #'helpful-callable)
     ([remap describe-variable] #'helpful-variable)
-    ([remap describe-key] #'helpful-key)))
+    ([remap describe-key] #'helpful-key)
+
+    ;; Hack to make helpful also kick in when using apropos. Simply
+    ;; advising the global `describe-*' functions breaks things, so we
+    ;; have to be more focused and verbose.
+    ;;
+    ;; See also https://github.com/Wilfred/helpful/issues/25
+    :config
+    (let ((do-function (lambda (button)
+                         (helpful-function (button-get button 'apropos-symbol))))
+          (do-variable (lambda (button)
+                         (helpful-variable (button-get button 'apropos-symbol)))))
+      ;; :supertype only takes effect statically, at the time of
+      ;; definition, so we can in fact redefine a button with itself
+      ;; as its supertype
+      (define-button-type 'apropos-function    :supertype 'apropos-function    'action do-function)
+      (define-button-type 'apropos-macro       :supertype 'apropos-macro       'action do-function)
+      (define-button-type 'apropos-command     :supertype 'apropos-command     'action do-function)
+      (define-button-type 'apropos-variable    :supertype 'apropos-variable    'action do-variable)
+      (define-button-type 'apropos-user-option :supertype 'apropos-user-option 'action do-variable))
+    :init
+    ;; Advice to ensure helfpul is loaded. Annoyingly, we can't make
+    ;; it remove itself without making it way more complicated, so
+    ;; let's just leave it in, it's really tiny
+    (defun apropos-preload-helpful (&rest args)
+      (require 'helpful))
+
+    (loop for command in '(apropos apropos-command apropos-documentation
+                           apropos-library apropos-local-value apropos-local-variable
+                           apropos-user-option apropos-value apropos-variable)
+          do (advice-add command :before #'apropos-preload-helpful))))
