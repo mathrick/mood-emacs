@@ -6,6 +6,10 @@
              (featurep! :system nil :gui))
     (set-frame-font font t t)))
 
+;; Be kind, give the user a chance to back out of this incredibly easy
+;; to press by accident key combo
+(setq! confirm-kill-emacs (quote y-or-n-p))
+
 (unless (featurep! -windmove)
   (use-package windmove
     :defer t
@@ -73,7 +77,7 @@
 
 (use-package wdired
   :general ('dired-mode-map
-	    "r" #'wdired-change-to-wdired-mode))
+            "r" #'wdired-change-to-wdired-mode))
 
 ;; Show a nice cheat sheet for available keys
 (unless (featurep! -which-key)
