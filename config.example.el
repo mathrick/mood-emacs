@@ -28,6 +28,9 @@
        :vcs				;; Git, Bazaar, Hg, and others
        magit				;; Honestly, don't even bother with git otherwise
 
+       :checkers                        ;; Trust, but verify
+       syntax				;; Get squigglies when programming
+
        :lang				;; Languages, of the programming kind
        (elisp +nameless)		;; This is Emacs, after all
        org				;; The all-singing, all-dancing organiser
