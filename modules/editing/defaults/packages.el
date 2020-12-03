@@ -21,8 +21,17 @@
     :hook (prog-mode . glasses-mode)))
 
 (unless (featurep! -comment-dwim)
-  (use-package comment-dwim-2
-    :general ("M-;" #'comment-dwim-2))
+  (let ((style (featurep! :comment-dwim)))
+    (use-package comment-dwim-2
+      :config
+      ;; By default, CD2 extends partial lines, rather than commenting
+      ;; out the region as marked, as `comment-dwim' does. This
+      ;; reverts to the way `comment-dwim' works, which is useful in
+      ;; its own right
+      (unless (eq style 'partial-lines)
+	(setq! cd2/region-command 'cd2/comment-or-uncomment-region))
+     :general ("M-;" #'comment-dwim-2)))
+
   (when (featurep! :editing org :enabled)
     (use-package comment-dwim-2
-    :general (org-mode-map "M-;" #'org-comment-dwim-2))))
+      :general (org-mode-map "M-;" #'org-comment-dwim-2))))
