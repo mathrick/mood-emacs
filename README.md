@@ -161,16 +161,16 @@ Installation
 
 3. Pick a location for your init file. It can be any of the [files
    Emacs will read on startup](https://www.gnu.org/software/emacs/manual/html_node/emacs/Init-File.html).
-   Either symlink or copy `<mood root>/init.example.el` to it:
+   Either symlink or copy `<mood root>/init.el` to it:
 
    ```
-   $ ln -s ~/Dev/mood-emacs/init.example.el ~/elisp/init.el
+   $ ln -s ~/Dev/mood-emacs/init.el ~/elisp/
    ```
 
    or
 
    ```
-   $ cp ~/Dev/mood-emacs/init.example.el ~/.emacs.d/init.el
+   $ cp ~/Dev/mood-emacs/init.el ~/.emacs.d/
    ```
 
    * If you're using Chemacs, the init file **must be** `<user root>/init.el`, 
@@ -179,15 +179,16 @@ Installation
    * On Windows, symlinks are not well-supported, so copying is necessary
 	 
 
-4. Start Emacs. If using Chemacs, start it with the newly created
-   profile:
+4. Start Emacs, optionally passing in `--with-mood <mood root>`. If
+   using Chemacs, start it with the newly created profile:
    
    ``` 
-   emacs --with-profile mood
+   emacs --with-profile mood --with-mood ~/Dev/mood-emacs
    ``` 
-   
-   Emacs will prompt you to enter the location of Mood checkout
-   (ie. `<mood root>`), and use that to create a loader stub under
+
+   If you omit `--with-mood` from the command line, Emacs will instead
+   prompt you to enter the location of Mood checkout (ie. `<mood
+   root>`). That location will be used to create a loader stub under
    `<user root>/mood.el`. The stub makes it easier to make your config
    machine-independent, and should not be checked into your VCS.
 
