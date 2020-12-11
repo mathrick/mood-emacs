@@ -98,6 +98,7 @@
     ;;
     ;; See also https://github.com/Wilfred/helpful/issues/25
     :config
+    (require 'apropos)
     (let ((do-function (lambda (button)
                          (helpful-function (button-get button 'apropos-symbol))))
           (do-variable (lambda (button)
