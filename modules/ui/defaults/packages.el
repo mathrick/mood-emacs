@@ -75,6 +75,12 @@
 ;; also in vertically split windows
 (setq! truncate-partial-width-windows nil)
 
+;; Make it so that <pgup> immediately followed by <pgdown> returns to
+;; the starting position, which is not Emacs's default. Arguably this
+;; could go into :ui/scrolling, but the default behaviour is so
+;; confusing, I think the fix belongs here
+(setq! scroll-preserve-screen-position t)
+
 (use-package wdired
   :general ('dired-mode-map
             "r" #'wdired-change-to-wdired-mode))
@@ -122,3 +128,9 @@
                            apropos-library apropos-local-value apropos-local-variable
                            apropos-user-option apropos-value apropos-variable)
           do (advice-add command :before #'apropos-preload-helpful))))
+
+(unless (featurep! -ibuffer)
+  (use-package ibuffer
+    :straight nil
+    :general
+    ([remap list-buffers] #'ibuffer)))
