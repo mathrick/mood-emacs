@@ -22,6 +22,7 @@
        company                          ; It's dangerous to type alone
        expand-region                    ; Make 'em bigger
        multiple-cursors                 ; Trust me, you want this
+       realgud                          ; The unified debugger interface, MkII
        smartparens                      ; Nobody likes counting 'em
        visual-regexp                    ; Not for parsing HTML
 
