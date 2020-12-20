@@ -12,3 +12,6 @@
   (use-package rainbow-delimiters
     :hook ((lisp-mode . rainbow-delimiters-mode)
            (emacs-lisp-mode . rainbow-delimiters-mode))))
+
+(unless (featurep! -edebug-x)
+  (use-package edebug-x))
