@@ -10,17 +10,16 @@
 ;; to press by accident key combo
 (setq! confirm-kill-emacs (quote y-or-n-p))
 
-(unless (featurep! -windmove)
-  (use-package windmove
-    :defer t
-    :init
-    (destructuring-bind (section module) *mood-current-module*
-      (let ((modifier (featurep! :windmove)))
-        (loop for (key func) in '((left windmove-left)
-                                  (right windmove-right)
-                                  (up windmove-up)
-                                  (down windmove-down))
-              do (general-define-key (vector (list modifier key)) func))))))
+(let ((modifier (featurep! :windmove)))
+  (when modifier
+    (use-package windmove
+     :defer t
+     :init
+     (loop for (key func) in '((left windmove-left)
+			       (right windmove-right)
+			       (up windmove-up)
+			       (down windmove-down))
+	   do (general-define-key (vector (list modifier key)) func)))))
 
 ;; CUA (https://en.wikipedia.org/wiki/IBM_Common_User_Access) mode
 ;; provides the CUA keys, as well as things like Shift-movement for

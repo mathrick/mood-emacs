@@ -1,4 +1,4 @@
-(defflag :font "If present, font spec to use as default font, e.g. \"monofur 10\"")
+(defflag :font nil "If present, font spec to use as default font, e.g. \"monofur 10\"")
 (defflag :windmove 'meta "Windmove prefix key, nil to disable")
 (defflag :cua t "Whether to use CUA-mode: t to use, nil to disable, 'keys to use with C-x/C-c/C-v/C-z")
 (defflag +toolbar)
