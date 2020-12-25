@@ -88,6 +88,12 @@
                    set-goal-column))
         (put command 'disabled nil))
 
+;; Sort directories first in dired
+(if (featurep 'ls-lisp)
+    (setq! ls-lisp-dirs-first t)
+  (setq! dired-listing-switches
+	 (format "%s --group-directories-first" dired-listing-switches)))
+
 (use-package wdired
   :general ('dired-mode-map
             "r" #'wdired-change-to-wdired-mode))
