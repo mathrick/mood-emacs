@@ -80,6 +80,14 @@
 ;; confusing, I think the fix belongs here
 (setq! scroll-preserve-screen-position t)
 
+;; None of these commands are any more "confusing" than usual, and all
+;; are immensely useful, so let's enable them
+(dolist (command '(narrow-to-region
+                   upcase-region
+                   downcase-region
+                   set-goal-column))
+        (put command 'disabled nil))
+
 (use-package wdired
   :general ('dired-mode-map
             "r" #'wdired-change-to-wdired-mode))
