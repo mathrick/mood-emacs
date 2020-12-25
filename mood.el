@@ -37,12 +37,27 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
   ;; Bootstrap all the necessary libraries
 
+  ;; We need to set up no-littering before anything else, in fact
+  ;; before we even load it, since straight.el should also use it
+  (unless *mood-allow-litter*
+    (defvar no-littering-var-directory (or (bound-and-true-p no-littering-var-directory)
+					   (expand-file-name "var/" user-emacs-directory))
+      "Placeholder until we load no-littering")
+    (defvar straight-base-dir no-littering-var-directory "Placeholder until we load straight.el")
+    ;; Mood doesn't use package.el, but we still want to prevent its
+    ;; droppings from being generated
+    (setq package-user-dir (expand-file-name "elpa/" no-littering-var-directory)))
+
   (unless *mood-no-init-straight*
     (mood-init-straight))
 
   (setq! straight-use-package-by-default t)
   (straight-use-package 'use-package)
-  (straight-use-package 'general)
+
+  (use-package general)
+
+  (unless *mood-allow-litter*
+    (use-package no-littering :demand t))
 
   (require 'mood-keys)
 

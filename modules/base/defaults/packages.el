@@ -20,7 +20,13 @@
     :config (save-place-mode t))
 
   (use-package recentf
-    :config (recentf-mode)))
+    :config
+    (unless *mood-allow-litter*
+      (add-to-list 'recentf-exclude no-littering-var-directory)
+      (add-to-list 'recentf-exclude no-littering-etc-directory)
+      (setq! auto-save-file-name-transforms
+	    `((".*" ,(no-littering-expand-var-file-name "auto-save/") t))))
+    (recentf-mode)))
 
 ;; Remove the incredibly annoying and pointless warning about symlinks
 ;; to a VC-controlled file

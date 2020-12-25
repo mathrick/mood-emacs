@@ -265,6 +265,12 @@ the given module's key)."
   "If t, Mood will not initialise straight.el. Needs to be set
   before Mood is loaded")
 
+(defvar *mood-allow-litter* nil
+  "If t, Mood will not load no-littering package and will not
+  attempt to keep the user directory clean. Note that changing
+  the value will not move existing files, so they will no longer
+  be recognised and new ones will be generated.")
+
 (defvar *mood-straight-use-shallow-clone* t
   "If t (default), straight.el will be set up to use shallow git
   clones by default. This provides massive time and badwidth
@@ -273,9 +279,13 @@ the given module's key)."
 (defun mood-init-straight ()
   "Initialise straight.el"
   (defvar bootstrap-version)
-  (defvar straight-vc-git-default-clone-depth (if *mood-straight-use-shallow-clone* 1 'full))
-  (let* ((bootstrap-file
-          (expand-file-name "straight/repos/straight.el/bootstrap.el" user-emacs-directory))
+  (defvar straight-vc-git-default-clone-depth (if *mood-straight-use-shallow-clone*
+						  1
+						'full))
+  (let* ((straight-dir (or (bound-and-true-p straight-base-dir)
+			   (join-path user-emacs-directory "straight/")))
+	 (bootstrap-file
+	  (join-path straight-dir "straight" "repos" "straight.el" "bootstrap.el"))
          (bootstrap-version 5))
     (unless (file-exists-p bootstrap-file)
       (with-current-buffer
