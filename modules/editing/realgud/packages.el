@@ -1,3 +1,6 @@
 ;; -*- lexical-binding: t; -*-
 
-(use-package realgud)
+;; FIXME: For some reason, realgud causes org-disputed-keys not to
+;; have any effect, so it must either be deferred, or loaded after
+;; :editing/org
+(use-package realgud :defer t)
