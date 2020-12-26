@@ -390,9 +390,9 @@ the given module's key)."
                      (mood--read-all-forms manifest-file))))
     (mood--parse-manifest manifest section module)))
 
-;; This would ordinarily be a horrible hack, since we (read) from a file inside
+;; This would ordinarily be a horrible hack, since we `read' from a file inside
 ;; a macro, but init code is a pretty special case and this makes it easier to
-;; implement (init ...) whilst also hopefully making it easier to byte-compile
+;; implement (init! ...) whilst also hopefully making it easier to byte-compile
 ;; later
 (defmacro mood--ingest-user-config (config-file)
   (let* ((config-file (eval config-file))
@@ -425,15 +425,16 @@ its canonical name, default value and direction. The canonical
 name is :THING, and the default value is nil for +THING and t for
 -THING. Direction is either '+ or '-.
 
-If FLAG is not a switch, return it unchanged, with direction
+If FLAG is not a switch, ie. it's already a keyword or plain
+symbol THING, just return its canonical name, with direction
 being `nil'."
-  (let ((name (symbol-name flag)))
+  (let ((name (keyword-or-symbol-name flag)))
     (cond
      ((string-prefix-p "+" name) (list (make-keyword (substring name 1))
                                        nil '+))
      ((string-prefix-p "-" name) (list (make-keyword (substring name 1))
                                        t '-))
-     (t (list flag nil nil)))))
+     (t (list (make-keyword name) nil nil)))))
 
 (provide 'mood-core)
 ;;; mood-core.el ends here
