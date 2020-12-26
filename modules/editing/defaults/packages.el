@@ -2,7 +2,7 @@
 
 (unless (featurep! +indent-tabs)
   ;; Tabs to indent are of the devil
-  (setq! indent-tabs-mode nil))
+  (setq-default indent-tabs-mode nil))
 
 (unless (featurep! -parens)
   ;;; Parens and cursor
