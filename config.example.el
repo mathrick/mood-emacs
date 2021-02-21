@@ -17,6 +17,7 @@
        (scrolling +yascroll +smooth)    ; I held out for 20 years, but I'll finally admit it: Emacs scrollbars look hideous with any decent theme
        undo                             ; Less confusing undo system
        ;;(undo +fu +session)            ; (undo-tree by default, but you can choose undo-fu)
+       windswap                         ; Like windmove, but also moves buffers
 
        :editing                         ; It's not an emacsitor!
        defaults                         ; Basic quality of life improvements
