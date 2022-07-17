@@ -14,10 +14,16 @@
 	:config (add-to-list 'company-backends
 			     '(company-anaconda :with company-capf))))))
 
-(when (or (not (featurep! -anaconda))
-	  (not (featurep! -pythonic)))
+(unless (featurep! -pythonic)
   (use-package pythonic
     :commands (pythonic-activate))
+
+  (unless (featurep! -pyenv)
+    (use-package pyenv-mode
+      :hook python-mode)
+    (use-package pyenv-mode-auto
+      :after pyenv-mode))
+
   ;; We used to use `pyvenv', which provides `pyvenv-restart-python',
   ;; but that is incompatible with `anaconda-mode' over TRAMP (see
   ;; https://github.com/pythonic-emacs/anaconda-mode/issues/400), so
