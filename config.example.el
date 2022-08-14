@@ -28,6 +28,7 @@
        realgud                          ; The unified debugger interface, MkII
        smartparens                      ; Nobody likes counting 'em
        visual-regexp                    ; Not for parsing HTML
+       visual-fill                      ; I don't want my text as wide as my screen
 
        :vcs                             ; Git, Bazaar, Hg, and others
        magit                            ; Honestly, don't even bother with git otherwise
