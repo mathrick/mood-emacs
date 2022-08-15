@@ -22,7 +22,8 @@
 
        :editing                         ; It's not an emacsitor!
        defaults                         ; Basic quality of life improvements
-       company                          ; It's dangerous to type alone
+       ;;company                        ; It's dangerous to type alone
+       corfu                            ; Corfu is to Company what Vertico is to Ivy
        expand-region                    ; Make 'em bigger
        multiple-cursors                 ; Trust me, you want this
        realgud                          ; The unified debugger interface, MkII
