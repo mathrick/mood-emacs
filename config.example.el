@@ -38,6 +38,7 @@
 
        :lang                            ; Languages, of the programming kind
        (elisp +nameless)                ; This is Emacs, after all
+       cl                               ; Elisp's bigger brother everyone admires
        ;;org                            ; The all-singing, all-dancing organiser
        ;;python                         ; And the flying circus
        ;;yaml                           ; The most complicated simple language known to man
