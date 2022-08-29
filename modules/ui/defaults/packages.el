@@ -119,7 +119,7 @@
     :config
     (require 'apropos)
     (let ((do-function (lambda (button)
-                         (helpful-function (button-get button 'apropos-symbol))))
+                         (helpful-callable (button-get button 'apropos-symbol))))
           (do-variable (lambda (button)
                          (helpful-variable (button-get button 'apropos-symbol)))))
       ;; :supertype only takes effect statically, at the time of
