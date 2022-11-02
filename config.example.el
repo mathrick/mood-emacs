@@ -7,7 +7,7 @@
        ;;zenburn                        ; The original dark theme
 
        :ui                              ; General appearance and behaviour
-       mood                             ; Mood at your fingertips
+       mood                             ; Mood config at your fingertips
        defaults                         ; Things we can all agree make sense
        ;;(defaults :font "monofur for Powerline 10")
        ;;auto-dim                       ; EXPERIMENTAL: I want to know where to look
@@ -40,6 +40,7 @@
        :lang                            ; Languages, of the programming kind
        (elisp +nameless)                ; This is Emacs, after all
        cl                               ; Elisp's bigger brother everyone admires
+       ;; clojure                       ; Elisp's cool younger sister
        ;;org                            ; The all-singing, all-dancing organiser
        ;;python                         ; And the flying circus
        ;;yaml                           ; The most complicated simple language known to man
