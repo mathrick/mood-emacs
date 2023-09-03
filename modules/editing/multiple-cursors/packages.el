@@ -21,30 +21,6 @@
   :straight nil
   :after multiple-cursors)
 
-;;;###autoload
-(defun mc/mark-next-and-advance (arg)
-  "Like `mc/mark-next-like-this', but advance to activate the new cursor"
-  (interactive "p")
-  (mc/mark-next-like-this arg)
-  (unless (> arg 1)
-    (mc/cycle-forward)))
-
-;;;###autoload
-(defun mc/mark-previous-and-advance (arg)
-  "Like `mc/mark-previous-like-this', but advance to activate the new cursor"
-  (interactive "p")
-  (mc/mark-previous-like-this arg)
-  (unless (> arg 1)
-    (mc/cycle-backward)))
-
-(unless (featurep! -advance-on-mark)
-  (use-package mc-cycle-cursors
-    :straight nil
-    :after multiple-cursors
-    :bind
-    (("C->" . 'mc/mark-next-and-advance)
-     ("C-<" . 'mc/mark-previous-and-advance))))
-
 (use-package rectangular-region-mode
   :straight nil
   :after multiple-cursors
