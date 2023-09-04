@@ -8,7 +8,7 @@
 
 ;;; Commentary:
 ;; Definitions of core Mood functions and variables
-;; 
+;;
 
 ;;; Code:
 
@@ -92,7 +92,7 @@
   `mood-feature-get/put' implement a special convention: flags
   that specify the addition or enabling of something are instead
   named with leading + (ie. +lsp), whereas flags specifying the
-  removal or disabling of something start with - 
+  removal or disabling of something start with -
   (ie. -default-keybindings) and its value is negated. In both
   cases the underlying flag is still stored and can be accessed
   as a keyword, the +/- convention is just a way of specifying
@@ -170,7 +170,7 @@ module)) when a module's definition is being evaluated.")
 						     module)
 					  flag))
 		     (value (second found)))
-		(cond 
+		(cond
 		 ;; Negate the value of negative switches
 		 ((and found (eq dir '-)) (return-from outer (not value)))
 		 (found (return-from outer value))
@@ -205,7 +205,8 @@ module)) when a module's definition is being evaluated.")
 positional arguments and quotes them"
   `(mood-feature-get ,@(when flagp `(:section  ',section-or-flag))
                  ,@(when modulep `(:module  ',module))
-                 ':flag ',(if flagp flag section-or-flag)))
+                 ':flag ',(if flagp flag section-or-flag)
+                 :error-if-missing ,error-if-missing))
 
 (defun mood-find-module (section module)
   (let ((module-dir (join-path (keyword-or-symbol-name section)
@@ -223,7 +224,9 @@ positional arguments and quotes them"
 
   ((:section1 module1 path) (:section2 module2 path) ...)
 
-  where PATH is an element of `*mood-module-paths*'"
+  where PATH is a subdirectory of an element of `*mood-module-paths*' where
+  the module resides. The same section and module can appear multiple times
+  with different paths"
   (let ((valid-name-regexp (rx bol
 			       (+ (or wordchar "-"))
 			       eol)))
@@ -241,7 +244,7 @@ positional arguments and quotes them"
 		       if (valid-name-p section-path module)
 		       collect (list (make-keyword section)
 				     (intern module)
-				     path)))))))
+				     (join-path section-path module))))))))
 
 (defun mood-load-module (section module &optional flags)
   "Load the specified MODULE from SECTION, adding FLAGS to
@@ -371,7 +374,7 @@ the given module's key)."
 			     (mood--parse-switch-flag name)
 			   (if (and dir doc)
 			       (error "defflag: switch flags take at most one argument")
-			     (list flag default doc))))))
+			     (list flag default dir (if dir doc-or-default doc)))))))
     (loop for form in manifest
           with collected-flags = ()
           with collected-autoloads = ()
@@ -406,17 +409,17 @@ the given module's key)."
 						    nconc
 						    (destructuring-bind (&key flags autoloads)
 							(mood--ingest-manifest section module)
-						      (loop for (flag value _doc) in flags
+						      (loop for (flag value dir _doc) in flags
 							    collect  `(mood-feature-put :section ,section
 										    :module ',module
 										    :flag ',flag
 										    :value ,value))))))
-			     `(progn
-			     ;; FIXME: Hacky, but I don't want to rewrite flag-put right now :\
-			     (let ((*mood-feature-flags* *mood-feature-flag-defaults*))
-			       ,@default-forms
-			       (setf *mood-feature-flag-defaults* *mood-feature-flags*))
-			     ,@load-forms)))))
+			   `(progn
+			      ;; FIXME: Hacky, but I don't want to rewrite flag-put right now :\
+			      (let ((*mood-feature-flags* *mood-feature-flag-defaults*))
+			        ,@default-forms
+			        (setf *mood-feature-flag-defaults* *mood-feature-flags*))
+			      ,@load-forms)))))
        ,@user-code)))
 
 (defun mood--parse-switch-flag (flag)
