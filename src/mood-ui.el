@@ -1,4 +1,5 @@
 ;; -*- lexical-binding: t; nameless-current-name: "mood" -*-
+
 ;; mood-ui.el --- Mood, the modular Emacs config that isn't Doom
 
 ;; Copyright (C) 2020  Maciej Katafiasz
@@ -101,7 +102,8 @@ config, so a restart of Emacs might be necessary."
 Feature flags are the switches mentioned in the (`featurep!' ...) macro. Only
 local flags will be returned, that is, ones using the short form
 \(featurep! +foo) of the macro. Explicit flags using the long form
-\(featurep! :section :module +flag) will not be
+\(featurep! :section :module +flag) will not be. Extraction does not execute
+the module's code.
 
 The returned list will contain lists as its elements, coming from the
 `mood--parse-switch-flag' function. Although any given parsed list will
@@ -109,7 +111,10 @@ only appear once in the result, a given flag might appear multiple times,
 if it was parsed from different forms, e.g.
 \(featurep! +foo)
 \(featurep! -foo)
-;; => ((:foo nil +) (:foo t -))"
+;; => ((:foo nil +) (:foo t -))
+
+It is the caller's responsibility to ensure the list returned is
+valid and self-consistent (see `mood--normalise-extracted-flags')"
   (let ((tag (make-symbol "sentinel"))
         (accumulator ()))
     ;; This is admittedly somewhat hacky, but it's not performance-sensitive code, and doing it this
@@ -137,10 +142,23 @@ if it was parsed from different forms, e.g.
     accumulator))
 
 (defun mood--normalise-extracted-flags (path flags)
+  "Normalise FLAGS returned by `mood--extract-module-flags'
+PATH is the path of the file the flags were extracted from, and
+is only used for context information if an error is signalled.
+
+After normalising, the list is guaranteed to contain each flag
+exactly once, including its default, direction and
+documentation (if those were provided). If inconsistent flags
+were present (e.g. +foo and -foo), an error will be signalled
+instead"
   (cl-loop with seen = ()
            for decl in flags
            do (destructuring-bind (flag default direction) decl
                 (destructuring-bind (&optional prev-default prev-direction) (plist-get seen flag)
+                  ;; FIXME: This only really looks at the direction as the marker of uniqueness and
+                  ;; consistency. default and doc could in principle differ, and we wouldn't know,
+                  ;; but is it a real concern? It can't really happen when extracting flags from
+                  ;; packages.el at the moment
                   (when (and direction
                              prev-direction
                              (not (eq direction prev-direction)))
@@ -151,63 +169,11 @@ if it was parsed from different forms, e.g.
            finally return (cl-loop for (flag (def dir)) on seen by #'cddr collect `(,flag ,def ,dir nil))))
 
 (defun mood--merge-flags (manifest-flags extracted-flags)
-  "Combine manifest with extracted flags that aren't already in the manifest"
+  "Combine manifest flags with extracted flags that aren't already in the manifest"
   (append manifest-flags (cl-loop for extracted in extracted-flags
                                   for (flag &rest _) = extracted
                                   if (not (assoc flag manifest-flags))
                                   collect extracted)))
-
-(defun mood--gen-module-help (section module path)
-  "Workhorse helper for `mood-help-module'.
-Return string Insert help for given module in current buffer"
-  (let* ((manifest (mood--ingest-manifest section module))
-         (module-path (join-path path "packages.el"))
-         (extracted-flags (mood--normalise-extracted-flags module-path
-                                                       (mood--extract-module-flags (mood--read-all-forms module-path)))))
-    (destructuring-bind (&key flags autoloads) manifest
-      (let* ((flags (mood--merge-flags flags extracted-flags))
-             (help-lines (cl-loop for (flag default dir doc) in flags
-                                  collect (format "  * %s: %s%s %s-- %s"
-                                                  (if dir "Switch" "Parameter")
-                                                  (or dir ":")
-                                                  (keyword-or-symbol-name flag)
-                                                  (if (not dir)
-                                                      (format "(default %s) " default)
-                                                    "")
-                                                  (or doc "*undocumented*")))))
-        (with-output-to-string
-          (let ((header (format "Mood module :%s/%s" (keyword-or-symbol-name section) module)))
-            (princ header)
-            (terpri)
-            (princ (make-string (length header) ?=))
-            (terpri)
-            (terpri)
-            (if help-lines
-                (progn
-                  (princ "Flags: ")
-                  (terpri)
-                  (cl-loop for line in help-lines
-                           do (princ line)
-                           do (terpri)))
-              (progn
-                (princ "Module does not declare any flags")))))))))
-
-(defun mood--gen-module-help-buffer-name (section module)
-  (format "*Mood module help :%s/%s*" (keyword-or-symbol-name section) (keyword-or-symbol-name module)))
-
-(defun mood-help-module (section module path)
-  "Show help for given module. Interactively, prompt for the module.
-  The help will contain at least all the feature flags the module
-  accepts, and can be ehanced by documentation provided in its
-  manifest"
-  (interactive (mood--interactive-prompt-module))
-  (let ((buffer (get-buffer-create (mood--gen-module-help-buffer-name section module))))
-    (with-current-buffer buffer
-      (setf buffer-read-only nil)
-      (erase-buffer)
-      (insert (mood--gen-module-help section module path))
-      (setf buffer-read-only t))
-    (display-buffer buffer)))
 
 (provide 'mood-ui)
 ;;; mood-ui.el ends here
