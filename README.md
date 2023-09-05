@@ -89,7 +89,7 @@ The goals of Mood are as follows, in rough order of importance:
    about winning screenshot contests against Atom & friends, but
    there's no reason not to have a smart editor that can reasonably
    compete against IDEs in terms of functionality provided, and be
-   pretty to look at
+   pretty to look at.
 
 Usage
 =====
@@ -107,16 +107,20 @@ GNU.org. Using Cygwin or Win10 with WSL will require adjustments_
 
 	Click on `New...` user variable. Call it `HOME`, and give it the
 	value of `%USERPROFILE%`. This will make it point to your user
-	folder (to access it through the file explorer, navigate to
-	Desktop in the file explorer, then click the arrow in the address
-	bar and select your user folder from the dropdown list).
+	folder.
 
-	Below `~/` refers to the home directory you've just set up.
+    **Note**: The user folder is not normally (easily) accessible via
+	the file explorer. To access it, navigate to Desktop in the file
+	explorer, then click the arrow in the address bar and select your
+	user folder from the dropdown list.
+
+	From now on, I'll use `~/` to refer to the home directory you
+    just set up.
 
 
-### Using Chemacs
+### Using Chemacs 2
 
-[Chemacs](https://github.com/plexus/chemacs) is recommended. Chemacs
+[Chemacs 2](https://github.com/plexus/chemacs2) is recommended. Chemacs
 provides an easy way to switch between multiple profiles, and even if
 you only use one profile, it makes it much easier to put Emacs config
 files in an arbitrary location. If you decide to use Chemacs, follow
@@ -125,9 +129,17 @@ its installation instructions first. Afterwards, set up a profile
 your `<user root>` from step 2 below:
 
 ```
-(("default" . ((user-emacs-directory . "~/.emacs.d")))
- ("mood" . ((user-emacs-directory . "~/elisp"))))
+(("default" . ((user-emacs-directory . "~/elisp)))
+ ("mood" . ((user-emacs-directory . "~/elisp-mood"))))
 ```
+
+### Using Chemacs 1
+
+If you've been using the original Chemacs version, you can continue to
+do so, but be aware that you'll lose the ability to load
+`early-init.el`.  This means that things like disabling `package.el`
+won't be possible. Otherwise, the setup is identical to what you'd do
+with Chemacs 2, as described above.
 
 
 Installation
@@ -144,8 +156,9 @@ Installation
    next step.
 
 2. Create a directory where your Mood-powered Emacs config will
-   live. This can either be the standard location (`~/.emacs.d/`), or
-   somewhere else. For me, it's `~/elisp`.
+   live. This can either be the standard location (`~/.emacs.d/`,
+   unless you're using Chemacs 2, in which case you will have to pick
+   something else), or a custom directory. For me, it's `~/elisp`.
 
    ```
    $ mkdir ~/elisp
@@ -161,7 +174,11 @@ Installation
 
 3. Pick a location for your init file. It can be any of the [files
    Emacs will read on startup](https://www.gnu.org/software/emacs/manual/html_node/emacs/Init-File.html).
-   Either symlink or copy `<mood root>/init.el` to it:
+
+   **NOTE**: If you're using Chemacs 2, the init file must be located
+   at `<user root>/init.el`
+
+   Either symlink or copy `<mood root>/init.el` to your init file:
 
    ```
    $ ln -s ~/Dev/mood-emacs/init.el ~/elisp/
@@ -173,18 +190,28 @@ Installation
    $ cp ~/Dev/mood-emacs/init.el ~/.emacs.d/
    ```
 
-   * If you're using Chemacs, the init file **must be** `<user root>/init.el`, 
+   * If you're using Chemacs, the init file **must be** `<user root>/init.el`,
 	 since Chemacs already resides in `~/.emacs`
 
    * On Windows, symlinks are not well-supported, so copying is necessary
-	 
 
-4. Start Emacs, optionally passing in `--with-mood <mood root>`. If
+4. (Optional but recommended)
+   Create a file `<user root>/early-init.el`, with the following contents:
+   ```elisp
+   ;; Disable package.el, use straight.el exclusively
+   (setq package-enable-at-startup nil)
+   ```
+
+   This will disable loading packages via the built-in Emacs package manager
+   at startup. Mood uses `straight.el` exclusively, and recommends against
+   loading anything through `package.el` due to its numerous problems.
+
+5. Start Emacs, optionally passing in `--with-mood <mood root>`. If
    using Chemacs, start it with the newly created profile:
-   
-   ``` 
+
+   ```
    emacs --with-profile mood --with-mood ~/Dev/mood-emacs
-   ``` 
+   ```
 
    If you omit `--with-mood` from the command line, Emacs will instead
    prompt you to enter the location of Mood checkout (ie. `<mood
@@ -192,7 +219,7 @@ Installation
    `<user root>/mood.el`. The stub makes it easier to make your config
    machine-independent, and should not be checked into your VCS.
 
-   Next, it will bootstrap [`straight.el`](https://github.com/raxod502/straight.el) 
+   Next, it will bootstrap [`straight.el`](https://github.com/raxod502/straight.el)
    and install the required libraries (Internet connection is
    necessary). Depending on your connection speed, it might take a
    while, but Mood configures `straight.el` to minimise the badwidth
@@ -203,14 +230,17 @@ Installation
    config. Otherwise, it will be skipped and Emacs should start almost
    instantly.
 
-5. At the end of the bootstrap, Mood will prompt to create the
+   **NOTE**: You don't need to pass `--with-mood` when starting Emacs
+   normally, it is only needed for the first run.
+
+6. At the end of the bootstrap, Mood will prompt to create the
    `config.el` file from template. Answer `y` to that, then edit the
    default config to your liking. When you're done, run `M-x
    mood-reload` or restart Emacs. There will be some delay as straight
    installs the packages you selected, but again, that will only
    happen once.
 
-6. Congratulations! Your Emacs is now ready to use.
+7. Congratulations! Your Emacs is now ready to use.
 
 Configuration
 -------------
