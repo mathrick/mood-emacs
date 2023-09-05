@@ -378,14 +378,22 @@ the given module's key)."
     (loop for form in manifest
           with collected-flags = ()
           with collected-autoloads = ()
+          with description = nil
           do (pcase form
                (`(defflag . ,spec) (push (normalise spec) collected-flags))
                (`(autoload . ,autoloads)
 		(error "Autoloads not currently implemented")
 		(push autoloads collected-autoloads))
+               ((and (or `(description ,desc)
+                         desc)
+                     (guard (stringp desc)))
+                (if description
+                    (error "Manifest for %s/%s declares multiple description blocks" section module)
+                  (setf description desc)))
 	       (_ (error "Unrecognised form %s in manifest for %s/%s" form section module)))
-          finally return `(:flags ,collected-flags
-			   :autoloads ,(mapcan #'identity collected-autoloads)))))
+          finally return `(:flags ,(reverse collected-flags)
+			   :autoloads ,(reverse (mapcan #'identity collected-autoloads))
+                           :description ,description))))
 
 (defun mood--ingest-manifest (section module)
   (let* ((manifest-file (join-path  (mood-find-module section module) "manifest.el"))

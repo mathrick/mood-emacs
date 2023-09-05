@@ -70,7 +70,7 @@ Return string Insert help for given module in current buffer"
          (module-path (join-path path "packages.el"))
          (extracted-flags (mood--normalise-extracted-flags module-path
                                                        (mood--extract-module-flags (mood--read-all-forms module-path)))))
-    (destructuring-bind (&key flags autoloads) manifest
+    (destructuring-bind (&key flags autoloads description) manifest
       (let* ((flags (mood--merge-flags flags extracted-flags))
              (flag-help-lines (cl-loop for (flag default dir doc) in flags
                                        collect (format "* %s: %s %s-- %s"
@@ -81,13 +81,15 @@ Return string Insert help for given module in current buffer"
                                                        (if (not dir)
                                                            (mood--text-as-special (format "(default %s) " default))
                                                          "")
-                                                       (or doc (mood--text-as-undocumented "undocumented"))))))
+                                                       (or doc (mood--text-as-undocumented "undocumented")))))
+             (description (or description (mood--text-as-undocumented "No description provided"))))
         (apply #'concat
-          (cl-loop for line in `(,(mood--format-header (format "Mood module :%s/%s" (keyword-or-symbol-name section) module))
-                                 ,(if flag-help-lines
-                                      (mood--format-section "Flags" flag-help-lines)
-                                    (list "Module does not declare any flags")))
-                   collect (mood--format-line line)))))))
+               (cl-loop for line in `(,(mood--format-header (format "Mood module :%s/%s" (keyword-or-symbol-name section) module))
+                                      ,(mood--format-line description)
+                                      ,(if flag-help-lines
+                                           (mood--format-section "Configuration flags" flag-help-lines)
+                                         (mood--text-as-undocumented "Module does not declare any configuration flags")))
+                        collect (mood--format-line line)))))))
 
 (defun mood--gen-module-help-buffer-name (section module)
   (format "*Mood module help :%s/%s*" (keyword-or-symbol-name section) (keyword-or-symbol-name module)))
