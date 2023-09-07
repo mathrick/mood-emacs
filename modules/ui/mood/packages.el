@@ -4,7 +4,8 @@
   :prefix-command 'mood-ui-map
   "M" '(mood-open-module-dir :wk "Find module dir")
   "P" '(mood-open-user-config :wk "Open personal config")
-  "R" '(mood-reload :wk "Reload config"))
+  "R" '(mood-reload :wk "Reload config")
+  "H" '(mood-help-module :wk "Show help and configuration for given module"))
 
 (general-def 'help-map
   "M" '(mood-ui-map :wk "Mood Emacs dashboard"))
@@ -79,17 +80,18 @@ Return string Insert help for given module in current buffer"
                                                                                      (or dir ":")
                                                                                      (keyword-or-symbol-name flag)))
                                                        (if (not dir)
-                                                           (mood--text-as-special (format "(default %s) " default))
+                                                           (format (mood--text-as-special "(default %s) ")
+                                                                   (mood--text-as-identifier (format "%s" default)))
                                                          "")
                                                        (or doc (mood--text-as-undocumented "undocumented")))))
              (description (or description (mood--text-as-undocumented "No description provided"))))
-        (apply #'concat
-               (cl-loop for line in `(,(mood--format-header (format "Mood module :%s/%s" (keyword-or-symbol-name section) module))
-                                      ,(mood--format-line description)
-                                      ,(if flag-help-lines
-                                           (mood--format-section "Configuration flags" flag-help-lines)
-                                         (mood--text-as-undocumented "Module does not declare any configuration flags")))
-                        collect (mood--format-line line)))))))
+        (concat (mood--format-header (format "Mood module :%s/%s" (keyword-or-symbol-name section) module))
+                (mood--format-line "")
+                (mood--format-line description)
+                (mood--format-line "")
+                (if flag-help-lines
+                    (mood--format-section "Configuration flags" flag-help-lines)
+                  (mood--text-as-undocumented "This module does not declare any configuration flags")))))))
 
 (defun mood--gen-module-help-buffer-name (section module)
   (format "*Mood module help :%s/%s*" (keyword-or-symbol-name section) (keyword-or-symbol-name module)))

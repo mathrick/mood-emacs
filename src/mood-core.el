@@ -386,7 +386,8 @@ the given module's key)."
 		(push autoloads collected-autoloads))
                ((and (or `(description ,desc)
                          desc)
-                     (guard (stringp desc)))
+                     (guard (or (null desc) ;; Allow (description nil) placeholder form
+                                (stringp desc))))
                 (if description
                     (error "Manifest for %s/%s declares multiple description blocks" section module)
                   (setf description desc)))
@@ -415,7 +416,7 @@ the given module's key)."
 			   (mood--parse-init-block body)
 			 (let ((default-forms (loop for (section module) in modules
 						    nconc
-						    (destructuring-bind (&key flags autoloads)
+						    (destructuring-bind (&key flags autoloads description)
 							(mood--ingest-manifest section module)
 						      (loop for (flag value dir _doc) in flags
 							    collect  `(mood-feature-put :section ,section

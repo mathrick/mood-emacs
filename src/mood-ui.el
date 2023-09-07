@@ -97,6 +97,47 @@ config, so a restart of Emacs might be necessary."
   (interactive)
   (load user-init-file))
 
+(defun mood--extract-named-forms (symbols body)
+  "Given a list of SYMBOLS, extract all matching forms from BODY.
+
+BODY will be macroexpanded, so all places in which SYMBOLS are
+called, even indirectly, will be collected. A form matches given
+symbol if it's of the form (SYMBOL . REST) (ie. a function or
+macro call). The return value is a list of all matching forms, in
+order in which they appear in BODY (traversed
+depth-first). Matching forms will be returned in their original
+shape, ie. without any macroexpansion done."
+
+  (let* ((syms-to-fresh (cl-loop for sym in symbols
+                                 collect (cons sym (make-symbol (format "--%s--" sym)))))
+         (fresh-to-syms (cl-loop for (sym . fresh) in syms-to-fresh
+                                 collect (cons fresh sym)))
+         (expanders (cl-loop for sym in symbols
+                             ;; Create macrolet definition for each SYMBOL which simply expands to a
+                             ;; quoted copy of itself with a fresh name. Since the names are fresh
+                             ;; symbols, we can safely pick them out after macroexpansion, and
+                             ;; quoting prevents further macroexpansion of the form.
+                             collect `(,sym (&rest rest)
+                                            `(quote (,',(cdr (assq sym syms-to-fresh)) ,@,'rest)))))
+         ;; Now we simply macroexpand everything. Since
+         (expanded (macroexpand-all `(macrolet (,@expanders)
+                                       ,body))))
+    ;; Finally, collect everything into the final list to be returned, mapping back from fresh names
+    ;; to original
+    (cl-labels ((traverse (form acc)
+                          (pcase form
+                            ;; If we see one of our fresh symbols, we know it was originally a form
+                            ;; we were interested in, so collect it under the original name
+                            ((and `(,fresh . ,rest)
+                                  (guard (assq fresh fresh-to-syms)))
+                             (cons `(,(cdr (assq fresh fresh-to-syms)) ,@rest) acc))
+                            ;; For any other list, descend into head, then tail
+                            (`(,head . ,tail)
+                             (traverse tail (traverse head acc)))
+                            ;; If not a list, just return accumulator as-is
+                            (_ acc))))
+      (reverse (traverse expanded ())))))
+
 (defun mood--extract-module-flags (forms)
   "Given FORMS of Mood module's packages.el, extract feature flags it uses.
 Feature flags are the switches mentioned in the (`featurep!' ...) macro. Only
@@ -115,31 +156,12 @@ if it was parsed from different forms, e.g.
 
 It is the caller's responsibility to ensure the list returned is
 valid and self-consistent (see `mood--normalise-extracted-flags')"
-  (let ((tag (make-symbol "sentinel"))
-        (accumulator ()))
-    ;; This is admittedly somewhat hacky, but it's not performance-sensitive code, and doing it this
-    ;; way means we don't have to do any code walking. What this code does is repeatedly macroexpand
-    ;; the FORMS, with a local definition of `featurep!' which instead of expanding will throw the
-    ;; flag it got to the catch established outside of the macroexpand. The outside code can then
-    ;; push the flag to the accumulator, and start a new round of macroexpansion. The two-step
-    ;; process is used because within macroexpand, the code doesn't seem to have access to the outer
-    ;; scope, so it can't push to the accumulator directly. If the same flag is seen again, it will
-    ;; be skipped, so that the next (featurep! ...) can be expanded. When no more unextracted
-    ;; (featurep!) forms remain, the catch form will return NIL, so we know we're done
-    (cl-loop with done = nil
-             while (not done)
-             do (let ((flag (catch tag
-                              (macroexpand-all
-                               `(macrolet ((featurep! (flag &rest full-spec)
-                                                      (let ((flag (mood--parse-switch-flag flag)))
-                                                        ;; Non-local features are not a part of the module's definition, so skip them
-                                                        (unless (or full-spec (member flag ',accumulator))
-                                                          (throw ',tag flag)))))
-                                  ,@forms))
-                              nil)))
-                  (when flag (push flag accumulator))
-                  (setf done (not flag))))
-    accumulator))
+  (cl-loop with flags = ()
+           for form in (mood--extract-named-forms '(featurep!) forms)
+           do (pcase form
+                (`(featurep! ,flag)
+                 (pushnew (mood--parse-switch-flag flag) flags :test #'equal)))
+           finally return flags))
 
 (defun mood--normalise-extracted-flags (path flags)
   "Normalise FLAGS returned by `mood--extract-module-flags'
