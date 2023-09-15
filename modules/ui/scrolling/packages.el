@@ -1,11 +1,11 @@
 ;; -*- lexical-binding: t; -*-
 
-(if (or (featurep! -scrollbar)
-        (featurep! +yascroll))
+(if (or (feature! -scrollbar)
+        (feature! +yascroll))
     (scroll-bar-mode -1)
   (scroll-bar-mode 1))
 
-(when (featurep! +yascroll)
+(when (feature! +yascroll)
   (use-package yascroll
     :config
     (global-yascroll-bar-mode 2)
@@ -18,7 +18,7 @@
 ;; `scroll-conservatively' was meant to achieve, ie. make it so that
 ;; scrolling line by line to the bottom of the screen doesn't result
 ;; in huge disorienting jumps by screenfuls
-(unless (featurep! -conservative)
+(unless (feature! -conservative)
   (use-package smooth-scrolling
     :config
     (setq smooth-scroll-margin 3)
@@ -28,7 +28,7 @@
 ;; and is the least annoying and most usable implementation of
 ;; it. `pixel-scroll-mode', which is included in Emacs 26+, is
 ;; comically sluggish and thus entirely useless
-(when (featurep! +smooth)
+(when (feature! +smooth)
   (use-package sublimity-scroll
     :straight sublimity
     :config

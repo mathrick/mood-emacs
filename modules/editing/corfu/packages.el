@@ -4,8 +4,8 @@
   :config
   (global-corfu-mode))
 
-(unless (or (featurep! -icons)
-            (not (featurep! :system nil :gui)))
+(unless (or (feature! -icons)
+            (not (feature! :system nil :gui)))
   ;; Shamelessly stolen from https://kristofferbalintona.me/posts/202202270056/
   (use-package kind-icon
     :after corfu
@@ -24,7 +24,7 @@
     (add-to-list 'corfu-margin-formatters #'kind-icon-margin-formatter)
     ))
 
-(unless (featurep! -doc)
+(unless (feature! -doc)
   (use-package corfu-doc
     :after corfu
     :hook (corfu-mode . corfu-doc-mode)))

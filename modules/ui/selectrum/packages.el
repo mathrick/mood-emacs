@@ -4,9 +4,9 @@
   :config
   (selectrum-mode +1))
 
-(let ((style (featurep! style))
-      (separators (featurep! extra-separators))
-      (history (featurep! history)))
+(let ((style (feature! style))
+      (separators (feature! extra-separators))
+      (history (feature! history)))
   (ecase style
     (emacs
      ;; Starting with raxod502/selectrum#330, `completion-styles' are

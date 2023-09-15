@@ -1,19 +1,19 @@
 ;; -*- lexical-binding: t; -*-
 
-(if (featurep! +fu)
+(if (feature! +fu)
     (progn
       (use-package undo-fu
         :general ("C-_" undo-fu-only-undo)
                  ("M-_" undo-fu-only-redo))
-      (when (featurep! +session)
+      (when (feature! +session)
         (use-package undo-fu-session
           :after undo-fu
           :config (global-undo-fu-session-mode))))
   (use-package undo-tree
     :config
     ;; Undo conflicting bindings
-    (when (featurep! :editing expand-region :enabled)
+    (when (feature! :editing expand-region :enabled)
       (general-unbind undo-tree-map "C-?"))
-    (when (featurep! :editing smartparens :enabled)
+    (when (feature! :editing smartparens :enabled)
       (general-unbind undo-tree-map "M-?"))
     (global-undo-tree-mode)))

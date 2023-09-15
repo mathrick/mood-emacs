@@ -1,7 +1,7 @@
 ;; -*- lexical-binding: t; -*-
 
-(let ((minibuffer (not (featurep! +minibuffer)))
-      (background (or (featurep! +minibuffer)
+(let ((minibuffer (not (feature! +minibuffer)))
+      (background (or (feature! +minibuffer)
                       )))
 
   ;; https://oremacs.com/2015/04/28/blending-faces/

@@ -1,24 +1,24 @@
 ;; -*- lexical-binding: t; -*-
 
-(unless (featurep! -server)
-  (when (member (featurep! :server) '(nil t :anaconda))
+(unless (feature! -server)
+  (when (member (feature! :server) '(nil t :anaconda))
     (use-package anaconda-mode
       :hook (python-mode
 	     (python-mode . anaconda-eldoc-mode)))
     ;; FIXME: It would be nice if that could be done declaratively
     ;; through a glue layer, without anaconda needing to know about
     ;; company
-    (when (featurep! :editing company :enabled)
+    (when (feature! :editing company :enabled)
       (use-package company-anaconda
 	:after (company anaconda-mode)
 	:config (add-to-list 'company-backends
 			     '(company-anaconda :with company-capf))))))
 
-(unless (featurep! -pythonic)
+(unless (feature! -pythonic)
   (use-package pythonic
     :commands (pythonic-activate))
 
-  (unless (featurep! -pyenv)
+  (unless (feature! -pyenv)
     (use-package pyenv-mode
       :hook python-mode)
     (use-package pyenv-mode-auto
@@ -29,7 +29,7 @@
   ;; https://github.com/pythonic-emacs/anaconda-mode/issues/400), so
   ;; this is a re-implementation on top of pythonic that anaconda is
   ;; built on, and which already provides (de)activate commands
-  (unless (featurep! -venv-restart)
+  (unless (feature! -venv-restart)
     (use-package pythonic
       :config
       (defcustom pythonic-restart-python-on-activate t

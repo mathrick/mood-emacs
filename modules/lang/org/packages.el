@@ -1,9 +1,9 @@
 ;; -*- lexical-binding: t; -*-
 
 
-(let ((cua (featurep! :ui defaults :cua))
-      (protect-meta (eq (featurep! :ui defaults :windmove) 'meta))
-      (disputed-keys (featurep! :disputed-keys)))
+(let ((cua (feature! :ui defaults :cua))
+      (protect-meta (eq (feature! :ui defaults :windmove) 'meta))
+      (disputed-keys (feature! :disputed-keys)))
   ;; Due to how :straight works, we need to disable it here so that
   ;; key replacements can occur before org is loaded, otherwise they
   ;; will have no effect

@@ -1,6 +1,6 @@
 ;; -*- lexical-binding: t; -*-
 
-(let ((always-show-recent (featurep! +always-show-recent)))
+(let ((always-show-recent (feature! +always-show-recent)))
   (use-package magit
     :defer t
     :config
@@ -16,6 +16,6 @@
                               #'magit-insert-unpushed-to-upstream
                               t))))
 
-(unless (featurep! -forge)
+(unless (feature! -forge)
   (use-package forge
     :after magit))

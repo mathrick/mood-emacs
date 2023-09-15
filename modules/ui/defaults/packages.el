@@ -1,16 +1,16 @@
 ;; -*- lexical-binding: t; -*-
 
-(let ((font (featurep! :font)))
+(let ((font (feature! :font)))
   (when (and font
              (not (eq font t))
-             (featurep! :system nil :gui))
+             (feature! :system nil :gui))
     (set-frame-font font t t)))
 
 ;; Be kind, give the user a chance to back out of this incredibly easy
 ;; to press by accident key combo
 (setq! confirm-kill-emacs (quote y-or-n-p))
 
-(let ((modifier (featurep! :windmove)))
+(let ((modifier (feature! :windmove)))
   (when modifier
     (use-package windmove
      :defer t
@@ -32,10 +32,10 @@
 ;; which is commonly also referred to as "CUA", including by the CUA
 ;; mode, even though that is in fact incorrect. That isn't enabled by
 ;; default
-(unless (featurep! -cua)
-  ;; Short form of (featurep! ...) won't work by the time :config
+(unless (feature! -cua)
+  ;; Short form of (feature! ...) won't work by the time :config
   ;; runs, so save the value here
-  (let ((keys (eq (featurep! :cua) 'keys)))
+  (let ((keys (eq (feature! :cua) 'keys)))
     (use-package cua-base
      :defer 0
      :config
@@ -51,15 +51,15 @@
            (cua-mode nil))
        (cua-selection-mode nil)))))
 
-(unless (featurep! +toolbar)
+(unless (feature! +toolbar)
   (setq! tool-bar-mode nil))
 
-(unless (featurep! -menubar)
+(unless (feature! -menubar)
   (setq! menu-bar-mode t))
 
 ;; Make sure the mouse cursor is not in the way
-(when (and (featurep! :system nil :gui)
-           (not (featurep! -avoid)))
+(when (and (feature! :system nil :gui)
+           (not (feature! -avoid)))
   (use-package avoid
     :config
     (mouse-avoidance-mode 'exile)
@@ -99,12 +99,12 @@
             "r" #'wdired-change-to-wdired-mode))
 
 ;; Show a nice cheat sheet for available keys
-(unless (featurep! -which-key)
+(unless (feature! -which-key)
   (use-package which-key
     :config (which-key-mode)))
 
 ;; Nicer help functions
-(unless (featurep! -helpful)
+(unless (feature! -helpful)
   (use-package helpful
     :general
     ([remap describe-function] #'helpful-callable)
@@ -142,7 +142,7 @@
                            apropos-user-option apropos-value apropos-variable)
           do (advice-add command :before #'apropos-preload-helpful))))
 
-(unless (featurep! -ibuffer)
+(unless (feature! -ibuffer)
   (use-package ibuffer
     :straight nil
     :general

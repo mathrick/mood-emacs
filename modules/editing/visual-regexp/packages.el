@@ -8,7 +8,7 @@
             "C-x R Q" 'vr/query-replace
             "C-x R C" 'vr/mc-mark))
 
-(unless (featurep! -steroids)
+(unless (feature! -steroids)
   (use-package pcre2el :defer t)
 
   (use-package visual-regexp-steroids

@@ -1,13 +1,16 @@
 ;; -*- lexical-binding: t; -*-
 
-(unless (featurep! +slime)
+(unless (feature! +slime)
   (use-package sly)
 
-  (unless (featurep! -asdf)
+  (unless (feature! -asdf)
     (use-package sly-asdf))
-  (unless (featurep! -readtables)
+  (unless (feature! -readtables)
     (use-package sly-named-readtables))
-  (unless (featurep! -ql)
+  (unless (feature! -ql)
     (use-package sly-quicklisp))
-  (unless (featurep! -macrostep)
+  (unless (feature! -macrostep)
     (use-package sly-macrostep)))
+
+(when (feature! +slime)
+  (error "Module :lang/cl currently only supports SLY, not SLIME"))

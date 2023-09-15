@@ -1,6 +1,6 @@
 ;; -*- lexical-binding: t; -*-
 
-(when (memq (featurep! :system nil :os) '(:windows))
+(when (memq (feature! :system nil :os) '(:windows))
   ;; Windows compatibility
   (use-package ls-lisp
     :straight nil

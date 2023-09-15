@@ -1,8 +1,8 @@
 ;; -*- lexical-binding: t; -*-
 
-(let ((-strict (featurep! -strict))
-      (-parens (featurep! -highlight))
-      (style  (featurep! :style)))
+(let ((-strict (feature! -strict))
+      (-parens (feature! -highlight))
+      (style  (feature! :style)))
   (unless (memq style '(paredit sp))
     (error "Unknown smartparens style: %s" style))
   (use-package smartparens-config
@@ -14,8 +14,8 @@
     :config
     (setq! sp-base-key-bindings style)
     ;; Unset SP's default keys that clash with other things we set
-    (let* ((windmove (featurep! :ui defaults :windmove))
-           (cua (not (featurep! :ui defaults -cua)))
+    (let* ((windmove (feature! :ui defaults :windmove))
+           (cua (not (feature! :ui defaults -cua)))
            (unset `(,@(when windmove
                         ;; sp-override-key-bindings requires strings
                         ;; in (kbd) notation
@@ -49,7 +49,7 @@
     (if -strict
         (smartparens-global-mode)
       (smartparens-global-strict-mode))
-    (unless (or (featurep! :editing defaults -parens)
+    (unless (or (feature! :editing defaults -parens)
                 -parens)
       (use-package smartparens-config
         :straight nil

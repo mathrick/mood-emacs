@@ -16,9 +16,9 @@
   :config
   (vertico-mode))
 
-(let ((style (featurep! style))
-      (separators (featurep! extra-separators))
-      (history (featurep! history)))
+(let ((style (feature! style))
+      (separators (feature! extra-separators))
+      (history (feature! history)))
   (ecase style
     ;; Nothing to do if the style is emacs, since that comes built-in
     (orderless
@@ -39,7 +39,7 @@
          :config
          (historian-mode +1))))))
 
-(when (featurep! +posframe)
+(when (feature! +posframe)
   (use-package vertico-posframe
     :config
     (vertico-posframe-mode)

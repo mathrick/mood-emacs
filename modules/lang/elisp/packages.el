@@ -1,17 +1,17 @@
 ;; -*- lexical-binding: t; -*-
 
-(unless (featurep! -macrostep)
+(unless (feature! -macrostep)
   (use-package macrostep))
 
-(when (featurep! +nameless)
+(when (feature! +nameless)
   (use-package nameless
     :hook (emacs-lisp-mode . nameless-mode)
     :config (setq! nameless-private-prefix t)))
 
-(unless (featurep! -rainbow)
+(unless (feature! -rainbow)
   (use-package rainbow-delimiters
     :hook ((lisp-mode . rainbow-delimiters-mode)
            (emacs-lisp-mode . rainbow-delimiters-mode))))
 
-(unless (featurep! -edebug-x)
+(unless (feature! -edebug-x)
   (use-package edebug-x))

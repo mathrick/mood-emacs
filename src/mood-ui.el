@@ -140,26 +140,26 @@ shape, ie. without any macroexpansion done."
 
 (defun mood--extract-module-flags (forms)
   "Given FORMS of Mood module's packages.el, extract feature flags it uses.
-Feature flags are the switches mentioned in the (`featurep!' ...) macro. Only
+Feature flags are the switches mentioned in the (`feature!' ...) macro. Only
 local flags will be returned, that is, ones using the short form
-\(featurep! +foo) of the macro. Explicit flags using the long form
-\(featurep! :section :module +flag) will not be. Extraction does not execute
+\(feature! +foo) of the macro. Explicit flags using the long form
+\(feature! :section :module +flag) will not be. Extraction does not execute
 the module's code.
 
 The returned list will contain lists as its elements, coming from the
 `mood--parse-switch-flag' function. Although any given parsed list will
 only appear once in the result, a given flag might appear multiple times,
 if it was parsed from different forms, e.g.
-\(featurep! +foo)
-\(featurep! -foo)
+\(feature! +foo)
+\(feature! -foo)
 ;; => ((:foo nil +) (:foo t -))
 
 It is the caller's responsibility to ensure the list returned is
 valid and self-consistent (see `mood--normalise-extracted-flags')"
   (cl-loop with flags = ()
-           for form in (mood--extract-named-forms '(featurep!) forms)
+           for form in (mood--extract-named-forms '(feature!) forms)
            do (pcase form
-                (`(featurep! ,flag)
+                (`(feature! ,flag)
                  (pushnew (mood--parse-switch-flag flag) flags :test #'equal)))
            finally return flags))
 

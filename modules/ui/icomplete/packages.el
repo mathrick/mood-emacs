@@ -3,7 +3,7 @@
 (use-package icomplete
   :config (icomplete-mode))
 
-(when (featurep! +vertical)
+(when (feature! +vertical)
   (use-package icomplete-vertical
     :demand t
     :config

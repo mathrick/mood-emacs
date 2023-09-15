@@ -9,7 +9,7 @@
    ("C-M->" . mc/skip-to-next-like-this)
    ("M->" . mc/mark-all-dwim)))
 
-(unless (featurep! +cancel-on-ret)
+(unless (feature! +cancel-on-ret)
   (use-package multiple-cursors
     :bind
     (:map mc/keymap

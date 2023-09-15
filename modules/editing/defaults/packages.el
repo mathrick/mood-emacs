@@ -1,10 +1,10 @@
 ;; -*- lexical-binding: t; -*-
 
-(unless (featurep! +indent-tabs)
+(unless (feature! +indent-tabs)
   ;; Tabs to indent are of the devil
   (setq-default indent-tabs-mode nil))
 
-(unless (featurep! -parens)
+(unless (feature! -parens)
   ;;; Parens and cursor
   (use-package paren
     :config
@@ -15,7 +15,7 @@
     :hook (prog-mode . global-highlight-parentheses-mode)))
 
 ;; CamelCase is a bit tedious to read, this helps with that
-(unless (featurep! -glasses)
+(unless (feature! -glasses)
   (use-package glasses
     :config
     (setq! glasses-face 'bold)
@@ -24,8 +24,8 @@
     (setq! glasses-separate-parentheses-p nil)
     :hook (prog-mode . glasses-mode)))
 
-(unless (featurep! -comment-dwim)
-  (let ((style (featurep! :comment-dwim)))
+(unless (feature! -comment-dwim)
+  (let ((style (feature! :comment-dwim)))
     (use-package comment-dwim-2
       :config
       ;; By default, CD2 extends partial lines, rather than commenting
@@ -36,6 +36,6 @@
 	(setq! cd2/region-command 'cd2/comment-or-uncomment-region))
      :general ("M-;" #'comment-dwim-2)))
 
-  (when (featurep! :editing org :enabled)
+  (when (feature! :editing org :enabled)
     (use-package comment-dwim-2
       :general (org-mode-map "M-;" #'org-comment-dwim-2))))

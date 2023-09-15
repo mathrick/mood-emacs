@@ -198,11 +198,24 @@ module)) when a module's definition is being evaluated.")
 								     (not value)
 								   value)))))))))
 
-(cl-defmacro featurep! (section-or-flag
+(cl-defmacro feature! (section-or-flag
                         &optional (module nil modulep) (flag nil flagp)
                         error-if-missing)
-  "Convenience wrapper around `mood-feature-get' which takes
-positional arguments and quotes them"
+  "Macro allowing Mood modules to query feature flags set by the user.
+Two forms are supported:
+;; Short form
+\(when (feature! +foo) ...)
+
+;; Long form
+\(when (feature! :ui 'somemodule -baz) ...)
+
+Short form accesses flags set by the current module during
+loading process, and should be used by a module's definition to
+determine user's preferences.
+
+Long form is used only to access another module's flags, or
+pseudo-modules such as (nil 'os), to allow the module to provide
+optional integration or adapt to the platform."
   `(mood-feature-get ,@(when flagp `(:section  ',section-or-flag))
                  ,@(when modulep `(:module  ',module))
                  ':flag ',(if flagp flag section-or-flag)
