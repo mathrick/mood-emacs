@@ -125,10 +125,48 @@ module)) when a module's definition is being evaluated.")
     (signal 'wrong-number-of-arguments
             '("Either only flag, or all of section/flag/module must be given")))
   (if sectionp
-      (list section module)
+      ;; Normalise section and module to plain symbol and keyword respectively (except for
+      ;; nil). This allows us to be more lenient in what we accept, and notably makes the
+      ;; shorthand notation easier to write
+      (list (and section (make-keyword (keyword-or-symbol-name section)))
+            (and module (intern (keyword-or-symbol-name module))))
     (or *mood-current-module*
         (signal 'wrong-number-of-arguments
                 '("Short form feature spec used, but *mood-current-module* is not bound")))))
+
+(defun mood--parse-shorthand (maybe-shorthand)
+  "If MAYBE-SHORTHAND is of the form :foo/bar/baz, return its parts, split on /.
+Any number of slashes (including zero) may be present, and the
+return value is a list of one or more uninterned symbols, unless
+the name is \"nil\", in which case nil will be returned. As a
+special case, zero-length elements will also be returned as nil, ie.
+\(mood--parse-shorthand :foo//bar) ;; => (foo nil bar)"
+  (mapcar (lambda (x)
+            (cond
+             ((or (string-empty-p x)
+                  (string= x "nil")) nil)
+             ;; Note: we must treat keywords specially, since (keywordp (make-symbol ":foo")) => nil,
+             ;; and that throws `keyword-or-symbol-name' off
+             ((eq (elt x 0) ?:) (make-keyword (substring x 1)))
+             (t (make-symbol x))))
+          (split-string (keyword-or-symbol-name maybe-shorthand) "/")))
+
+(defun mood--parse-switch-flag (flag)
+  "If FLAG is a switch (ie. of the form +THING or -THING), return
+its canonical name, default value and direction. The canonical
+name is :THING, and the default value is nil for +THING and t for
+-THING. Direction is either '+ or '-.
+
+If FLAG is not a switch, ie. it's already a keyword or plain
+symbol THING, just return its canonical name, with direction
+being `nil'."
+  (let ((name (keyword-or-symbol-name flag)))
+    (cond
+     ((string-prefix-p "+" name) (list (make-keyword (substring name 1))
+                                       nil '+))
+     ((string-prefix-p "-" name) (list (make-keyword (substring name 1))
+                                       t '-))
+     (t (list (make-keyword name) nil nil)))))
 
 (cl-defun mood-feature-get (&key (section nil sectionp) (module nil modulep)
                              (flag nil flagp) error-if-missing)
@@ -206,20 +244,33 @@ Two forms are supported:
 ;; Short form
 \(when (feature! +foo) ...)
 
-;; Long form
-\(when (feature! :ui 'somemodule -baz) ...)
+;; Long form, shorthand notation
+\(when (feature! :ui/somemodule/-baz))
+;; Long form, explicit notation; equivalent to the above
+\(when (feature! :ui somemodule -baz) ...)
 
 Short form accesses flags set by the current module during
 loading process, and should be used by a module's definition to
 determine user's preferences.
 
 Long form is used only to access another module's flags, or
-pseudo-modules such as (nil 'os), to allow the module to provide
+pseudo-modules such as :system/nil, to allow the module to provide
 optional integration or adapt to the platform."
-  `(mood-feature-get ,@(when flagp `(:section  ',section-or-flag))
-                 ,@(when modulep `(:module  ',module))
-                 ':flag ',(if flagp flag section-or-flag)
-                 :error-if-missing ,error-if-missing))
+  (let* ((parsed-shorthand (mood--parse-shorthand section-or-flag))
+         ;; This is ugly and repetitive, but cl-defmacro doesn't support
+         ;; &whole, so we have to reassemble args manually and then repeat
+         ;; the signature inside macrolet
+         (args (append parsed-shorthand
+                       (when modulep `(,module))
+                       (when flagp `(,flag)))))
+    `(macrolet ((doit (section-or-flag
+                       &optional (module nil modulep) (flag nil flagp)
+                       error-if-missing)
+                      `(mood-feature-get ,@(when flagp `(:section ',section-or-flag))
+                                     ,@(when modulep `(:module ',module))
+                                     :flag ',(if flagp flag section-or-flag)
+                                     :error-if-missing ,error-if-missing)))
+       (doit ,@args))))
 
 (defun mood-find-module (section module)
   (let ((module-dir (join-path (keyword-or-symbol-name section)
@@ -424,7 +475,6 @@ the given module's key)."
          (user-code (when (file-exists-p config-file)
                       (mood--read-all-forms config-file))))
     `(macrolet ((init! (&body body)
-                       ;; Double backquotes are too annoying to deal with
                        (destructuring-bind (load-forms modules)
 			   (mood--parse-init-block body)
 			 (let ((default-forms (loop for (section module) in modules
@@ -443,23 +493,6 @@ the given module's key)."
 			        (setf *mood-feature-flag-defaults* *mood-feature-flags*))
 			      ,@load-forms)))))
        ,@user-code)))
-
-(defun mood--parse-switch-flag (flag)
-  "If FLAG is a switch (ie. of the form +THING or -THING), return
-its canonical name, default value and direction. The canonical
-name is :THING, and the default value is nil for +THING and t for
--THING. Direction is either '+ or '-.
-
-If FLAG is not a switch, ie. it's already a keyword or plain
-symbol THING, just return its canonical name, with direction
-being `nil'."
-  (let ((name (keyword-or-symbol-name flag)))
-    (cond
-     ((string-prefix-p "+" name) (list (make-keyword (substring name 1))
-                                       nil '+))
-     ((string-prefix-p "-" name) (list (make-keyword (substring name 1))
-                                       t '-))
-     (t (list (make-keyword name) nil nil)))))
 
 (provide 'mood-core)
 ;;; mood-core.el ends here
