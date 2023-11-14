@@ -9,11 +9,11 @@
        :ui                              ; General appearance and behaviour
        mood                             ; Mood config at your fingertips
        defaults                         ; Things we can all agree make sense
-       ;;(defaults :font "monofur for Powerline 10")
-       ;;auto-dim                       ; EXPERIMENTAL: I want to know where to look
+       ;; (defaults :font "monofur for Powerline 10")
+       ;; auto-dim                      ; EXPERIMENTAL: I want to know where to look
        doom-modeline                    ; Shinier modeline
-       ;;(icomplete +vertical)          ; The traditional minibuffer completion
-       ;;selectrum                      ; Flexible minibuffer completion and narrowing
+       ;; (icomplete +vertical)         ; The traditional minibuffer completion
+       ;; selectrum                     ; Flexible minibuffer completion and narrowing
        vertico                          ; Like selectrum, but even simpler
        (scrolling +yascroll +smooth)    ; I held out for 20 years, but I'll finally admit it: Emacs scrollbars look hideous with any decent theme
        undo                             ; Less confusing undo system
@@ -34,6 +34,9 @@
        :vcs                             ; Git, Bazaar, Hg, and others
        magit                            ; Honestly, don't even bother with git otherwise
 
+       :tools                           ; Various tools and utilities
+       ;; vdiff                         ; What do you mean you don't like ediff?
+
        :checkers                        ; Trust, but verify
        syntax                           ; Get squigglies when programming
 
@@ -41,7 +44,8 @@
        (elisp +nameless)                ; This is Emacs, after all
        cl                               ; Elisp's bigger brother everyone admires
        ;; clojure                       ; Elisp's cool younger sister
-       ;;org                            ; The all-singing, all-dancing organiser
-       ;;python                         ; And the flying circus
-       ;;yaml                           ; The most complicated simple language known to man
+       ;; mood                          ; Not a real laguage, just helpers for writing Mood modules
+       ;; org                           ; The all-singing, all-dancing organiser
+       ;; python                        ; And the flying circus
+       ;; yaml                          ; The most complicated simple language known to man
        )

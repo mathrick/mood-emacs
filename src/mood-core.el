@@ -202,22 +202,22 @@ being `nil'."
                                                             module modulep)
     (destructuring-bind (flag default dir) (mood--parse-switch-flag flag)
       (block outer
-	(loop for plist in (list *mood-feature-flags* *mood-feature-flag-defaults*)
-	      do
-	      (let* ((found (plist-member (plist-get (plist-get plist section)
-						     module)
-					  flag))
-		     (value (second found)))
-		(cond
-		 ;; Negate the value of negative switches
-		 ((and found (eq dir '-)) (return-from outer (not value)))
-		 (found (return-from outer value))
-		 (error-if-missing
-		  (signal 'args-out-of-range
-			  (list (format "Flag %s/%s not present" section module)))))))
-	(if (eq dir '-)
-	    (not default)
-	  default)))))
+        (loop for plist in (list *mood-feature-flags* *mood-feature-flag-defaults*)
+              do
+              (let* ((found (plist-member (plist-get (plist-get plist section)
+                                                     module)
+                                          flag))
+                     (value (second found)))
+                (cond
+                 ;; Negate the value of negative switches
+                 ((and found (eq dir '-)) (return-from outer (not value)))
+                 (found (return-from outer value))
+                 (error-if-missing
+                  (signal 'args-out-of-range
+                          (list (format "Flag %s/%s not present" section module)))))))
+        (if (eq dir '-)
+            (not default)
+          default)))))
 
 (cl-defun mood-feature-put (&key (section nil sectionp) (module nil modulep)
                              (flag nil flagp) (value t))
@@ -228,13 +228,13 @@ being `nil'."
                                                             module modulep)
     (destructuring-bind (flag _default dir) (mood--parse-switch-flag flag)
       (let* ((section-plist (plist-get *mood-feature-flags* section))
-	     (module-plist (plist-get section-plist module)))
-	(setf *mood-feature-flags*
-	      (plist-put *mood-feature-flags* section
-			 (plist-put section-plist module
-				    (plist-put module-plist flag (if (eq dir '-)
-								     (not value)
-								   value)))))))))
+             (module-plist (plist-get section-plist module)))
+        (setf *mood-feature-flags*
+              (plist-put *mood-feature-flags* section
+                         (plist-put section-plist module
+                                    (plist-put module-plist flag (if (eq dir '-)
+                                                                     (not value)
+                                                                   value)))))))))
 
 (cl-defmacro feature! (section-or-flag
                         &optional (module nil modulep) (flag nil flagp)
@@ -292,23 +292,23 @@ optional integration or adapt to the platform."
   the module resides. The same section and module can appear multiple times
   with different paths"
   (let ((valid-name-regexp (rx bol
-			       (+ (or wordchar "-"))
-			       eol)))
+                               (+ (or wordchar "-"))
+                               eol)))
    (cl-flet ((valid-name-p (parent name)
-			   (and (file-directory-p (join-path parent name))
-				(string-match-p valid-name-regexp name))))
+                           (and (file-directory-p (join-path parent name))
+                                (string-match-p valid-name-regexp name))))
      (loop for path in *mood-module-paths*
-	   when (file-exists-p path)
-	   nconc
-	   (loop for section in (directory-files path)
-		 for section-path = (join-path path section)
-		 if (valid-name-p path section)
-		 nconc
-		 (loop for module in (directory-files section-path)
-		       if (valid-name-p section-path module)
-		       collect (list (make-keyword section)
-				     (intern module)
-				     (join-path section-path module))))))))
+           when (file-exists-p path)
+           nconc
+           (loop for section in (directory-files path)
+                 for section-path = (join-path path section)
+                 if (valid-name-p path section)
+                 nconc
+                 (loop for module in (directory-files section-path)
+                       if (valid-name-p section-path module)
+                       collect (list (make-keyword section)
+                                     (intern module)
+                                     (join-path section-path module))))))))
 
 (defun mood-load-module (section module &optional flags)
   "Load the specified MODULE from SECTION, adding FLAGS to
@@ -347,12 +347,12 @@ the given module's key)."
   "Initialise straight.el"
   (defvar bootstrap-version)
   (defvar straight-vc-git-default-clone-depth (if *mood-straight-use-shallow-clone*
-						  1
-						'full))
+                                                  1
+                                                'full))
   (let* ((straight-dir (or (bound-and-true-p straight-base-dir)
-			   (join-path user-emacs-directory "straight/")))
-	 (bootstrap-file
-	  (join-path straight-dir "straight" "repos" "straight.el" "bootstrap.el"))
+                           (join-path user-emacs-directory "straight/")))
+         (bootstrap-file
+          (join-path straight-dir "straight" "repos" "straight.el" "bootstrap.el"))
          (bootstrap-version 5))
     (unless (file-exists-p bootstrap-file)
       (with-current-buffer
@@ -365,28 +365,28 @@ the given module's key)."
 
 (defun mood--parse-init-block (args)
   (cl-labels ((no-sections (module)
-			   (error "Module %s specified before any sections" module))
-	      ;; convert +foo to :foo t, etc. to make it easier to parse
-	      (normalise-flags (flags)
-			       (loop for item in flags
-				     for valuep = nil then (not valuep)
-				     if valuep collect item
-				     else nconc
-				     (destructuring-bind (flag default dir)
-					 (mood--parse-switch-flag item)
-				       (if (not dir)
-					   (list item)
-					 (setf valuep t)
-					 (list flag (not default))))))
-	      (set-flags (flags section module)
-			 (loop for (flag value) on (normalise-flags flags) by #'cddr
-			       collect  `(mood-feature-put :section ,section
-						       :module ',module
-						       :flag ',flag
-						       :value ,value))))
+                           (error "Module %s specified before any sections" module))
+              ;; convert +foo to :foo t, etc. to make it easier to parse
+              (normalise-flags (flags)
+                               (loop for item in flags
+                                     for valuep = nil then (not valuep)
+                                     if valuep collect item
+                                     else nconc
+                                     (destructuring-bind (flag default dir)
+                                         (mood--parse-switch-flag item)
+                                       (if (not dir)
+                                           (list item)
+                                         (setf valuep t)
+                                         (list flag (not default))))))
+              (set-flags (flags section module)
+                         (loop for (flag value) on (normalise-flags flags) by #'cddr
+                               collect  `(mood-feature-put :section ,section
+                                                       :module ',module
+                                                       :flag ',flag
+                                                       :value ,value))))
     (loop with preamble = ()
           with body = ()
-	  with modules = ()
+          with modules = ()
           with current-section = nil
           for arg in args
           do (cond
@@ -399,22 +399,22 @@ the given module's key)."
               ((and (listp arg)
                     (eq (car arg) nil))
                (unless current-section (no-sections "<nil pseudo-module>"))
-	       (push (set-flags (cdr arg) current-section nil)
-		     preamble))
+               (push (set-flags (cdr arg) current-section nil)
+                     preamble))
               ((or (listp arg)
                    (symbolp arg))
                (destructuring-bind (module &rest flags) (ensure-list arg)
                  (unless current-section (no-sections module))
-		 (push (set-flags (append flags '(+enabled)) current-section module)
-		       preamble)
-		 (push `(mood-load-module ',current-section ',module)
-		       body)
-		 (push (list current-section module)
-		       modules))))
+                 (push (set-flags (append flags '(+enabled)) current-section module)
+                       preamble)
+                 (push `(mood-load-module ',current-section ',module)
+                       body)
+                 (push (list current-section module)
+                       modules))))
           finally return (list
-			  `(,@(mapcan #'identity (reverse preamble))
-			    ,@(reverse body))
-			  (reverse modules)))))
+                          `(,@(mapcan #'identity (reverse preamble))
+                            ,@(reverse body))
+                          (reverse modules)))))
 
 (defun mood--read-all-forms (file)
   (save-excursion
@@ -429,16 +429,16 @@ the given module's key)."
 
 (defun mood--parse-manifest (manifest section module)
   (cl-flet ((normalise (spec)
-		       (destructuring-bind (name &optional doc-or-default doc)
-			   spec
-			 (destructuring-bind (flag default-default dir
-						   &aux (default (if dir
-								     default-default
-								   doc-or-default)))
-			     (mood--parse-switch-flag name)
-			   (if (and dir doc)
-			       (error "defflag: switch flags take at most one argument")
-			     (list flag default dir (if dir doc-or-default doc)))))))
+                       (destructuring-bind (name &optional doc-or-default doc)
+                           spec
+                         (destructuring-bind (flag default-default dir
+                                                   &aux (default (if dir
+                                                                     default-default
+                                                                   doc-or-default)))
+                             (mood--parse-switch-flag name)
+                           (if (and dir doc)
+                               (error "defflag: switch flags take at most one argument")
+                             (list flag default dir (if dir doc-or-default doc)))))))
     (loop for form in manifest
           with collected-flags = ()
           with collected-autoloads = ()
@@ -446,8 +446,8 @@ the given module's key)."
           do (pcase form
                (`(defflag . ,spec) (push (normalise spec) collected-flags))
                (`(autoload . ,autoloads)
-		(error "Autoloads not currently implemented")
-		(push autoloads collected-autoloads))
+                (error "Autoloads not currently implemented")
+                (push autoloads collected-autoloads))
                ((and (or `(description ,desc)
                          desc)
                      (guard (or (null desc) ;; Allow (description nil) placeholder form
@@ -455,9 +455,9 @@ the given module's key)."
                 (if description
                     (error "Manifest for %s/%s declares multiple description blocks" section module)
                   (setf description desc)))
-	       (_ (error "Unrecognised form %s in manifest for %s/%s" form section module)))
+               (_ (error "Unrecognised form %s in manifest for %s/%s" form section module)))
           finally return `(:flags ,(reverse collected-flags)
-			   :autoloads ,(reverse (mapcan #'identity collected-autoloads))
+                           :autoloads ,(reverse (mapcan #'identity collected-autoloads))
                            :description ,description))))
 
 (defun mood--ingest-manifest (section module)
@@ -476,22 +476,22 @@ the given module's key)."
                       (mood--read-all-forms config-file))))
     `(macrolet ((init! (&body body)
                        (destructuring-bind (load-forms modules)
-			   (mood--parse-init-block body)
-			 (let ((default-forms (loop for (section module) in modules
-						    nconc
-						    (destructuring-bind (&key flags autoloads description)
-							(mood--ingest-manifest section module)
-						      (loop for (flag value dir _doc) in flags
-							    collect  `(mood-feature-put :section ,section
-										    :module ',module
-										    :flag ',flag
-										    :value ,value))))))
-			   `(progn
-			      ;; FIXME: Hacky, but I don't want to rewrite flag-put right now :\
-			      (let ((*mood-feature-flags* *mood-feature-flag-defaults*))
-			        ,@default-forms
-			        (setf *mood-feature-flag-defaults* *mood-feature-flags*))
-			      ,@load-forms)))))
+                           (mood--parse-init-block body)
+                         (let ((default-forms (loop for (section module) in modules
+                                                    nconc
+                                                    (destructuring-bind (&key flags autoloads description)
+                                                        (mood--ingest-manifest section module)
+                                                      (loop for (flag value dir _doc) in flags
+                                                            collect  `(mood-feature-put :section ,section
+                                                                                    :module ',module
+                                                                                    :flag ',flag
+                                                                                    :value ,value))))))
+                           `(progn
+                              ;; FIXME: Hacky, but I don't want to rewrite flag-put right now :\
+                              (let ((*mood-feature-flags* *mood-feature-flag-defaults*))
+                                ,@default-forms
+                                (setf *mood-feature-flag-defaults* *mood-feature-flags*))
+                              ,@load-forms)))))
        ,@user-code)))
 
 (provide 'mood-core)

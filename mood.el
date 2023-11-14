@@ -41,7 +41,7 @@
   ;; before we even load it, since straight.el should also use it
   (unless *mood-allow-litter*
     (defvar no-littering-var-directory (or (bound-and-true-p no-littering-var-directory)
-					   (expand-file-name "var/" user-emacs-directory))
+                                           (expand-file-name "var/" user-emacs-directory))
       "Placeholder until we load no-littering")
     (defvar straight-base-dir no-littering-var-directory "Placeholder until we load straight.el")
     ;; Mood doesn't use package.el, but we still want to prevent its

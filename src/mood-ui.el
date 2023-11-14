@@ -20,22 +20,22 @@
   "Prompt user for a symbolic module path (eg. :lang/python), and
 return a list of (section module path)"
   (let* ((completions (loop for candidate in (mood-known-modules)
-			    for (section module where) = candidate
-			    collect (cons (format "%s/%s" section module) candidate)))
-	 (selection (cdr (assoc-string (completing-read "Find module: " completions
-							nil t (try-completion "" completions))
-				       completions)))
-	 (candidates (remove-if-not (lambda (x)
-				      (equal x (subseq selection 0 2)))
-				    completions
-				    :key (lambda (x) (subseq x 1 3)))))
+                            for (section module where) = candidate
+                            collect (cons (format "%s/%s" section module) candidate)))
+         (selection (cdr (assoc-string (completing-read "Find module: " completions
+                                                        nil t (try-completion "" completions))
+                                       completions)))
+         (candidates (remove-if-not (lambda (x)
+                                      (equal x (subseq selection 0 2)))
+                                    completions
+                                    :key (lambda (x) (subseq x 1 3)))))
     (if (and current-prefix-arg
-	     (> (length candidates) 1))
-	(let* ((paths (mapcar (lambda (cand)
-				(list (abbreviate-file-name (elt cand 3)) cand))
-			      candidates)))
+             (> (length candidates) 1))
+        (let* ((paths (mapcar (lambda (cand)
+                                (list (abbreviate-file-name (elt cand 3)) cand))
+                              candidates)))
           (cdr (assoc-string (find (completing-read "Location: " paths nil t))
-		             paths)))
+                             paths)))
       selection)))
 
 (defun mood-open-module-dir (section module path)
