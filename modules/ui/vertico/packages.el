@@ -60,8 +60,8 @@
 (use-package marginalia
   :config (marginalia-mode))
 
-(use-package all-the-icons-completion
-  :after (marginalia all-the-icons)
-  :hook (marginalia-mode . all-the-icons-completion-marginalia-setup)
+(use-package nerd-icons-completion
+  :after (marginalia nerd-icons)
+  :hook (marginalia-mode . nerd-icons-completion-marginalia-setup)
   :init
-  (all-the-icons-completion-mode))
+  (nerd-icons-completion-mode))

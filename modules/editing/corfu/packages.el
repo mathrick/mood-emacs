@@ -21,10 +21,11 @@
     ;; sane locations.
     (svg-lib-icons-dir (no-littering-expand-var-file-name "svg-lib/cache/"))
     :config
-    (add-to-list 'corfu-margin-formatters #'kind-icon-margin-formatter)
-    ))
+    (add-to-list 'corfu-margin-formatters #'kind-icon-margin-formatter)))
 
 (unless (feature! -doc)
-  (use-package corfu-doc
+  (use-package corfu-popupinfo
     :after corfu
-    :hook (corfu-mode . corfu-doc-mode)))
+    :config
+    (setf corfu-popupinfo-delay '(0.5 . 0.2))
+    :hook (corfu-mode . corfu-popupinfo-mode)))
