@@ -20,7 +20,7 @@
   "Prompt user for a symbolic module path (eg. :lang/python), and
 return a list of (section module path)"
   (let* ((completions (loop for candidate in (mood-known-modules)
-                            for (section module where) = candidate
+                            for (section module where origin) = candidate
                             collect (cons (format "%s/%s" section module) candidate)))
          (selection (cdr (assoc-string (completing-read "Find module: " completions
                                                         nil t (try-completion "" completions))
@@ -38,7 +38,7 @@ return a list of (section module path)"
                              paths)))
       selection)))
 
-(defun mood-open-module-dir (section module path)
+(defun mood-open-module-dir (section module path origin)
   "Interactively open the directory in which a module is
 located. With prefix argument, also query for the location to
 look in (see `*mood-module-paths*') if more than one is possible,

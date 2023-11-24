@@ -26,7 +26,8 @@
            (mydir (file-name-directory (or symlink file))))
       (if (and (file-exists-p (expand-file-name "../src/" mydir))
                (file-exists-p (expand-file-name "../modules/" mydir)))
-          mydir
+          ;; Unexpand ~ in the returned dir
+          (abbreviate-file-name mydir)
         (error "mood.el must be located in subdirectory src/ of a checkout. Use (load) in your init file"))))
   "Directory in which mood.el resides. Should be a checkout of the Mood repo")
 
@@ -35,11 +36,24 @@
   containing src/ and modules/")
 
 (defvar *mood-module-paths*
-  (loop for dir in (list user-emacs-directory *mood-checkout-root*)
-        collect (join-path dir "modules"))
+  (loop for (dir . origin) in `((,user-emacs-directory . :user) (,*mood-checkout-root* . :upstream))
+        collect (cons (join-path dir "modules") origin))
   "List of directories where Mood modules can be found. Earlier
   entries take precedence over later ones, so upstream modules
   can be overriden by the user")
+
+(defvar *mood-wrap-module-load-function* nil
+  "Variable that, if set, should contain a function of two
+  arguments, which will be called for each module being loaded,
+  and which should wrap the load operation with appropriate
+  book-keeping. First argument passed in will be a closure, which
+  should be called to perform the actual load operation. The
+  second module will be the origin of the module, either
+  `:upstream' or `:user', depending on whether the module being
+  loaded was defined by Mood or the user respectively.
+
+  Primarily intended for use by package manager's profile
+  integration, ie. mood-straight.el")
 
 (defun mood--os-type ()
   (let ((os (cond
@@ -275,29 +289,31 @@ optional integration or adapt to the platform."
 (defun mood-find-module (section module)
   (let ((module-dir (join-path (keyword-or-symbol-name section)
                                (keyword-or-symbol-name module))))
-    (loop for path in *mood-module-paths*
+    (loop for (path . origin) in *mood-module-paths*
           for candidate = (join-path path module-dir)
           if (file-exists-p candidate)
-          return candidate
+          return (cons candidate origin)
           finally (error "Module %s/%s not found" section module))))
 
 (defun mood-known-modules ()
   "Return the list of all modules that are known, ie. exist on
   the filesystem and would be a valid argument for
-  `mood-find-module'. The return value is a list of three-element lists:
+  `mood-find-module'. The return value is a list of four-element lists:
 
-  ((:section1 module1 path) (:section2 module2 path) ...)
+  ((:section1 module1 path origin) (:section2 module2 path origin) ...)
 
-  where PATH is a subdirectory of an element of `*mood-module-paths*' where
-  the module resides. The same section and module can appear multiple times
-  with different paths"
+  where PATH is a subdirectory of an element of
+  `*mood-module-paths*' where the module resides, and ORIGIN is
+  one of `:upstream' or `:user', denoting whether it's a built-in
+  Mood module, or a user-defined one. The same section and module
+  can appear multiple times with different origins"
   (let ((valid-name-regexp (rx bol
                                (+ (or wordchar "-"))
                                eol)))
    (cl-flet ((valid-name-p (parent name)
                            (and (file-directory-p (join-path parent name))
                                 (string-match-p valid-name-regexp name))))
-     (loop for path in *mood-module-paths*
+     (loop for (path . origin) in *mood-module-paths*
            when (file-exists-p path)
            nconc
            (loop for section in (directory-files path)
@@ -308,7 +324,8 @@ optional integration or adapt to the platform."
                        if (valid-name-p section-path module)
                        collect (list (make-keyword section)
                                      (intern module)
-                                     (join-path section-path module))))))))
+                                     (join-path section-path module)
+                                     origin)))))))
 
 (defun mood-load-module (section module &optional flags)
   "Load the specified MODULE from SECTION, adding FLAGS to
@@ -318,19 +335,22 @@ should be a plain symbol.
 FLAGS, if set, should be a list of feature flags to pass to the
 module (more exactly, to save in `*mood-features-flags*', under
 the given module's key)."
-  (let* ((module-path (mood-find-module section module))
+  (let* ((module-info (mood-find-module section module))
+         (module-path (car module-info))
+         (origin (cdr module-info))
          (*mood-current-module* (list section module))
-         (load-prefer-newer t))
+         (load-prefer-newer t)
+         (wrap-fn (or *mood-wrap-module-load-function*
+                      (lambda (loader-fn origin)
+                        (funcall loader-fn)))))
     (loop for flag in flags
           do (destructuring-bind (flag &optional (value t)) (ensure-list flag)
                (mood-feature-put :section section :module module :flag flag :value value)))
     (let ((packages-file (join-path module-path "packages.el")))
       (when (file-exists-p packages-file)
-        (load packages-file)))))
-
-(defvar *mood-no-init-straight* nil
-  "If t, Mood will not initialise straight.el. Needs to be set
-  before Mood is loaded")
+        (funcall wrap-fn
+                 (lambda () (load packages-file))
+                 origin)))))
 
 (defvar *mood-allow-litter* nil
   "If t, Mood will not load no-littering package and will not
@@ -461,7 +481,8 @@ the given module's key)."
                            :description ,description))))
 
 (defun mood--ingest-manifest (section module)
-  (let* ((manifest-file (join-path  (mood-find-module section module) "manifest.el"))
+  (let* ((module-dir (car (mood-find-module section module)))
+         (manifest-file (join-path module-dir "manifest.el"))
          (manifest (when (file-exists-p manifest-file)
                      (mood--read-all-forms manifest-file))))
     (mood--parse-manifest manifest section module)))

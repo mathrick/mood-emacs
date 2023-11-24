@@ -33,6 +33,7 @@
 (let ((gc-cons-threshold most-positive-fixnum))
 
   (require 'mood-core)
+  (require 'mood-straight)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
   ;; Bootstrap all the necessary libraries
@@ -48,13 +49,24 @@
     ;; droppings from being generated
     (setq package-user-dir (expand-file-name "elpa/" no-littering-var-directory)))
 
-  (unless *mood-no-init-straight*
-    (mood-init-straight))
+  (mood-init-straight)
+
+  ;; Default value includes `seq', but that and is wrong and breaks
+  ;; compatibility of some packages on older Emacs versions
+  (setf straight-recipes-gnu-elpa-ignored-packages
+        (remq 'seq straight-recipes-gnu-elpa-ignored-packages))
 
   (setq! straight-use-package-by-default t)
   (straight-use-package 'use-package)
 
   (use-package general)
+  ;; Compat makes life easier when supporting multiple Emacs versions,
+  ;; and is broadly used, so it's a dependency for us
+  ;; as-well. Although it's built-in, by its very nature we need to
+  ;; `use-package' it because versions corresponding to newer Emacs
+  ;; versions that what we might be running on are distributed in GNU
+  ;; ELPA and mood-straight.el requires those functions.
+  (use-package compat :demand t)
 
   (unless *mood-allow-litter*
     (use-package no-littering :demand t))
@@ -65,9 +77,16 @@
   ;; At this point, we should have everything defined, so let's load the
   ;; user's config
 
-  (mood--ingest-user-config (join-path user-emacs-directory "config.el")))
+  ;; First, we need to set up things required for straight.el bookkeeping
+  (setf straight-profiles (mood--get-straight-profiles))
+  (setf *mood-wrap-module-load-function* #'mood--straight-wrap-module-load-function)
+  (mood--register-all-recipes)
 
-;; GC threshold restored to default
+  (mood--ingest-user-config (join-path user-emacs-directory "config.el"))
+  ;; Set the straight.el profile to user's, so that any package
+  ;; locking they might do is correctly saved to their lockfile
+  (setf straight-current-profile *mood-user-straight-profile*))
+
 
 (require 'mood-ui)
 (mood-maybe-create-user-config nil t)
