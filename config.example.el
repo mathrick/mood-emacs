@@ -11,7 +11,7 @@
        defaults                         ; Things we can all agree make sense
        ;; (defaults :font "monofur for Powerline 10")
        ;; auto-dim                      ; EXPERIMENTAL: I want to know where to look
-       doom-modeline                    ; Shinier modeline
+       modeline                         ; Shinier modeline
        ;; (icomplete +vertical)         ; The traditional minibuffer completion
        ;; selectrum                     ; Flexible minibuffer completion and narrowing
        vertico                          ; Like selectrum, but even simpler
