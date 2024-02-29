@@ -45,6 +45,7 @@
        (elisp +nameless)                ; This is Emacs, after all
        cl                               ; Elisp's bigger brother everyone admires
        ;; clojure                       ; Elisp's cool younger sister
+       emmet                            ; HTML that sucks a bit less
        ;; mood                          ; Not a real laguage, just helpers for writing Mood modules
        ;; org                           ; The all-singing, all-dancing organiser
        ;; python                        ; And the flying circus
