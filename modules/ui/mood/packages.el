@@ -96,7 +96,7 @@ Return string Insert help for given module in current buffer"
 (defun mood--gen-module-help-buffer-name (section module)
   (format "*Mood module help :%s/%s*" (keyword-or-symbol-name section) (keyword-or-symbol-name module)))
 
-(defun mood-help-module (section module path)
+(defun mood-help-module (section module path origin)
   "Show help for given module. Interactively, prompt for the module.
   The help will contain at least all the feature flags the module
   accepts, and can be ehanced by documentation provided in its

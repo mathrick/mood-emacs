@@ -18,7 +18,7 @@
 
 (defun mood--interactive-prompt-module ()
   "Prompt user for a symbolic module path (eg. :lang/python), and
-return a list of (section module path)"
+return a list of (section module path origin)"
   (let* ((completions (loop for candidate in (mood-known-modules)
                             for (section module where origin) = candidate
                             collect (cons (format "%s/%s" section module) candidate)))
@@ -28,14 +28,15 @@ return a list of (section module path)"
          (candidates (remove-if-not (lambda (x)
                                       (equal x (subseq selection 0 2)))
                                     completions
-                                    :key (lambda (x) (subseq x 1 3)))))
+                                    :key (lambda (x) (subseq x 1 3))))
+         (candidates (append candidates candidates)))
     (if (and current-prefix-arg
              (> (length candidates) 1))
         (let* ((paths (mapcar (lambda (cand)
                                 (list (abbreviate-file-name (elt cand 3)) cand))
                               candidates)))
-          (cdr (assoc-string (find (completing-read "Location: " paths nil t))
-                             paths)))
+          (second (assoc-string (completing-read "Location: " paths nil t)
+                                paths)))
       selection)))
 
 (defun mood-open-module-dir (section module path origin)
