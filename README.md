@@ -21,75 +21,37 @@ Intro
 
 This is Mood, a modular Emacs config inspired by Doom.
 
-I wrote Mood after I tried (and ultimately failed) to use my [previous
-config](https://github.com/mathrick/emacs-config) with [Doom
-Emacs](https://github.com/hlissner/doom-emacs). I tried porting to
-Doom after my previous framework, which was based on Grail and
-Cask/Pallet, bitrotted so far it was no longer functional. I got tired
-of hacking around its issues and simultaneously wishing it could do
-all the snazzy, shiny things all the cool kids were doing with their
-Emacses. So I thought I'd try Doom, which seemed like the most
-flexible and modular framework out of the current crop (Spacemacs,
-Prelude, etc.).
-
-I really like the idea of Doom. I like the idea of letting someone
-else figure out the hard parts of setting up Python autocompletion and
-whatnots. I like the idea of having a config framework (I wrote a
-small one previously, after all) that takes care of compiling and
-optimising everything and makes it easy to pick and choose from a set
-of preconfigured modules that take out the tedium and provide a nice,
-shiny-looking Emacs full of modern conveniences. Where Doom and I
-didn't really agree is the actual implementation.
-
-It makes some choices I find cumbersome (`bin/doom sync`, which also
-makes it very tricky to install in non-standard locations), some that
-are non-standard and confusing (popups library), and hardcoded in the
-core config and impossible to disable (`winner.el`). It ships with
-lots and lots of modules that are shiny, but also had some bad
-interactions that made it literally impossible to use over TRAMP
-because it'd freeze, and others that make buffer switching
-unpredictable.
-
-So I did what any self-respecting Lisp hacker would do, and figured
-I'd have a crack at it myself. Mood is my attempt at stealing the best
-pieces of Doom while fixing things that are problems to me.
-
 Goals
 -----
 
 The goals of Mood are as follows, in rough order of importance:
 
-1. Works for me and does what I want without undue pain. At the end of
-   the day, it's my config and that's my primary goal. I try not to
-   impose gratuitous decisions and make things as modular as I can,
-   but if something is too hard to make generic, I might make
+1. Works for me and does what I want without undue pain. At the end of the day, it's my
+   config and that's my primary goal. I try not to impose gratuitous decisions and make
+   things as modular as I can, but if something is too hard to make generic, I might make
    decisions that suit me primarily.
-2. Modular and with a minimum of hardcoded choices that can't be
-   changed. As long as #1 can be satisfied, I try to keep unrelated
-   concerns separate and independent.
-3. Portable. It should be trivial to move to another machine and start
-   using Emacs there simply by cloning your personal config repo. No
-   changes should be necessary to make it work. It should also be easy
-   to use it on Windows, although POSIX is the primary OS family
-   targeted.
-4. Easy to select reasonably broad chunks of configuration with sane
-   defaults and functionality out of the box. Whilst occasionally
-   certain things might require finer knobs to provide sufficient
-   flexibility, in general modules should only need to be enabled to
-   start working in a way the user expects.
-5. Well-documented and readable. The project is extremely young at the
-   moment, and still lacking in this regard, but good documentation
-   and readable code are something to strive for.
-6. Fast. Speed during normal use is more important than initalisation
-   or bootstrap speed, but neither should be needlessly
-   compromised. Things that might lead to unacceptable performance
-   under specific circumstances (e.g. when using TRAMP) should be easy
-   to disable.
-7. Aesthetically pleasing and functionally modern. I'm not too worried
-   about winning screenshot contests against Atom & friends, but
-   there's no reason not to have a smart editor that can reasonably
-   compete against IDEs in terms of functionality provided, and be
-   pretty to look at.
+2. Modular and with a minimum of hardcoded choices that can't be changed. As long as #1
+   can be satisfied, I try to keep unrelated concerns separate and independent.
+3. Portable. It should be trivial to move to another machine and start using Emacs there
+   simply by cloning your personal config repo. No changes should be necessary to make it
+   work. It should also be easy to use it on Windows, although POSIX is the primary OS
+   family targeted.
+4. Easy to select reasonably broad chunks of configuration with sane defaults and
+   functionality out of the box. Whilst occasionally certain things might require finer
+   knobs to provide sufficient flexibility, in general modules should only need to be
+   enabled to start working in a way the user expects.
+5. Well-documented and readable. The project is extremely young at the moment, and still
+   lacking in this regard, but good documentation and readable code are something to
+   strive for. This also means things that can be self-documenting should be
+   self-documenting.
+6. Fast. Speed during normal use is more important than initalisation or bootstrap speed,
+   but neither should be needlessly compromised. Things that might lead to unacceptable
+   performance under specific circumstances (e.g. when using TRAMP) should be easy to
+   disable.
+7. Aesthetically pleasing and functionally modern. I'm not too worried about winning
+   screenshot contests against Atom & friends, but there's no reason not to have a smart
+   editor that can reasonably compete against IDEs in terms of functionality provided, and
+   be pretty to look at.
 
 Usage
 =====
@@ -245,9 +207,85 @@ Installation
 Configuration
 -------------
 
-_FIXME_
+_[Note: this section is incomplete and needs expansion]_
+
+### `config.el` and the `init!` block
+
+The primary file the user interacts with is their `<user root>/config.el` file, which can
+be accessed via the <kbd>C-h</kbd><kbd>M</kbd><kbd>P</kbd> shortcut in the default
+configuration. As mentioned in the [Installation](#installation) section, this file will
+be created from a template if it doesn't exist yet, so that users will in general be
+presented with a default, recommended experience as the baseline.
+
+The core of `config.el` in turn is the `init!` block, which contains the _modules_ to be
+loaded, arranged in _sections_. Thus, the `config.el` file generally looks something like
+this:
+
+```elisp
+(init! :base                                    ; Base OS, Emacs and Mood config. You probably want all of them
+       defaults                                 ; You want them
+       os-support                               ; Make working on Windows suck less
+
+       :ui                                      ; General appearance and behaviour
+       mood
+       (defaults :font "monofur for Powerline")
+       auto-dim                                 ; I want to know where to look
+       doom-modeline                            ; Shinier modeline
+       (vertico -history +posframe)             ; Like selectrum, but even simpler
+       undo                                     ; Less confusing undo system
+
+       :editing                                 ; It's not an emacsitor!
+       defaults                                 ; Basic quality of life improvements
+       corfu                                    ; Corfu is to company what vertico is to Ivy
+
+       :vcs                                     ; Git, Bazaar, Hg, and others
+       (magit +always-show-recent)              ; Honestly, don't even bother with git without it
+       )
+
+
+;; Any further config you need goes here, just like in init.el
+(global-subword-mode)
+
+(general-def lisp-mode-shared-map
+  "C-c C-c"     #'eval-defun)
+```
+
+`:base`, `:ui`, etc. are _sections_, and the names like `defaults` or `corfu` are the
+_modules_ within these section. Thus `:ui/corfu` is the name of the module which adds and
+configures [Corfu](https://github.com/minad/corfu/) for in-buffer autocompletion.
+
+
 
 FAQ
 ===
 
-_FIXME_
+_[Note: this section is incomplete and needs expansion]_
+
+### Why Mood and not Doom?
+
+I wrote Mood after I tried (and ultimately failed) to use my [previous
+config](https://github.com/mathrick/emacs-config) with [Doom
+Emacs](https://github.com/hlissner/doom-emacs). I tried Doom after my previous framework,
+which was based on Grail and Cask/Pallet, bitrotted so far it was no longer functional. I
+got tired of hacking around its issues and simultaneously wishing it could do all the
+snazzy, shiny things all the cool kids were doing with their Emacses. So I thought I'd try
+Doom, which seemed like the most flexible and modular framework out of the current crop
+(Spacemacs, Prelude, etc.).
+
+I really like the idea of Doom. I like the idea of letting someone else figure out the
+hard parts of setting up Python autocompletion and whatnots. I like the idea of having a
+config framework (I wrote a small one previously, after all) that takes care of compiling
+and optimising everything and makes it easy to pick and choose from a set of preconfigured
+modules that take out the tedium and provide a nice, shiny-looking Emacs full of modern
+conveniences. Where Doom and I didn't really agree is the actual implementation.
+
+It makes some choices I find cumbersome (`bin/doom sync`, which also makes it very tricky
+to install in non-standard locations), some that are non-standard and confusing (popups
+library), and hardcoded in the core config and impossible to disable (`winner.el`). It
+ships with lots and lots of modules that are shiny, but also had some bad interactions
+that made it literally impossible to use over TRAMP because it'd freeze, and others that
+make buffer switching unpredictable.
+
+So I did what any self-respecting Lisp hacker would do, and figured I'd have a crack at it
+myself. Mood is my attempt at stealing the best ideas of Doom while fixing things that
+are problems to me.
