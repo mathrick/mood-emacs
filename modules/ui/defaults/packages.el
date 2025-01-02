@@ -147,3 +147,19 @@
     :straight nil
     :general
     ([remap list-buffers] #'ibuffer)))
+
+(unless (feature! -icons)
+  (use-package nerd-icons
+    :config
+    ;; Try to detect automatically if the user needs to install the fonts
+    (unless (or (find-font (font-spec :name nerd-icons-font-family))
+                ;; If we're not in GUI mode, there's no way to detect fonts
+                (not (feature! :system nil :gui)))
+      (when (y-or-n-p "Icons are not set up. Would you like to download and install the required fonts?")
+        (nerd-icons-install-fonts t))))
+  ;; Compatibility wrappers that bridge any code expecting all-the-icons to nerd-icons
+  (use-package all-the-icons)
+  (use-package all-the-icons-nerd-fonts
+    :after all-the-icons
+    :config
+    (all-the-icons-nerd-fonts-prefer)))

@@ -25,7 +25,8 @@
      (use-package orderless
        :config
        (when separators
-         (setq! orderless-component-separator " +\\|[-/]"))))
+         (setq! orderless-component-separator " +\\|[-/]"))
+       (pushnew 'orderless completion-styles)))
     
     ((nil emacs)))
 

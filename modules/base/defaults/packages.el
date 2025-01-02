@@ -25,7 +25,9 @@
       (add-to-list 'recentf-exclude no-littering-var-directory)
       (add-to-list 'recentf-exclude no-littering-etc-directory)
       (setq! auto-save-file-name-transforms
-	    `((".*" ,(no-littering-expand-var-file-name "auto-save/") t))))
+	     `((".*" ,(no-littering-expand-var-file-name "auto-save/") t)))
+      (unless (feature! -extra-litter)
+        (no-littering-theme-backups)))
     (recentf-mode)))
 
 ;; Remove the incredibly annoying and pointless warning about symlinks
