@@ -480,12 +480,27 @@ the given module's key)."
                            :autoloads ,(reverse (mapcan #'identity collected-autoloads))
                            :description ,description))))
 
-(defun mood--ingest-manifest (section module)
-  (let* ((module-dir (car (mood-find-module section module)))
+(defun mood--ingest-manifest (section module &optional path)
+  (let* ((module-dir (or path (car (mood-find-module section module))))
          (manifest-file (join-path module-dir "manifest.el"))
          (manifest (when (file-exists-p manifest-file)
                      (mood--read-all-forms manifest-file))))
     (mood--parse-manifest manifest section module)))
+
+(defun mood--get-manifest (section module path)
+  "Return the full, expanded manifest for MODULE.
+
+In addition to what `mood--ingest-manifest' provides, used flags
+  will be extracted from the module code, and placeholders will
+  be provided for undocumented ones."
+  (let* ((manifest (mood--ingest-manifest section module path))
+         (module-path (join-path path "packages.el"))
+         (extracted-flags (mood--normalise-extracted-flags module-path
+                                                       (mood--extract-module-flags (mood--read-all-forms module-path)))))
+    (destructuring-bind (&key flags autoloads description) manifest
+      `(:flags ,(mood--merge-flags flags extracted-flags)
+        :autoloads ,autoloads
+        :description ,description))))
 
 ;; This would ordinarily be a horrible hack, since we `read' from a file inside
 ;; a macro, but init code is a pretty special case and this makes it easier to

@@ -64,34 +64,79 @@
 (defun mood--text-as-identifier (text)
     (propertize text 'face mood-help-identifier-face))
 
+(defun mood--shorten-defflag (form)
+  "Given a `defflag' form in FORM, shorten it for on/off switches (ie. +foo -baz)."
+  (destructuring-bind (_ flag default dir &optional doc) form
+    `(defflag
+       ,(if dir
+            (make-symbol (format "%s%s" dir (keyword-or-symbol-name flag)))
+          flag)
+       ,@(unless dir `(,default))
+       ,@(when doc `(,doc)))))
+
+(defun mood-gen-module-manifest (section module path origin &optional insert-p)
+  "Generate or return the manifest for given MODULE as a string.
+
+Features which are already documented in the existing manifest
+will be returned as-is. Features which were detected but aren't
+documented will have a placeholder declaration generated.
+
+NOTE: any special formatting or comments present in the existing
+manifest will NOT be preserved!
+
+If called interactively, the module to generate the manifest for
+will be prompted for, and the s-expression form of the manifest
+inserted at point (unless prefix arg was provided, in which case
+nothing will be inserted). If called from Lisp, non-nil INSERT-P
+will trigger insertion."
+  (interactive (let ((args
+                      (append (mood--interactive-prompt-module)
+                              (list (< (prefix-numeric-value current-prefix-arg) 4)))))
+                 args))
+  (destructuring-bind (&key flags autoloads description)
+      (mood--get-manifest section module path)
+    (flet ((pprint (thing)
+                   "Blend between `pp' and `cl-prettyprint', since they have different types for which they produce
+suboptimal results"
+                   (pcase thing
+                     ('nil (debug))
+                     ((pred stringp) (format "%s\n" (with-temp-buffer
+                                                        (cl-prettyprint thing)
+                                                        (buffer-string))))
+                     (_ (pp thing t)))))
+        (let* ((sexps `(,@(when description `(,description))
+
+                     ,@(cl-loop for autoload in autoloads collect `(autoload ,@autoload))
+                     ,@(cl-loop for flag in flags collect (mood--shorten-defflag `(defflag ,@flag)))))
+            (lines (cl-loop for sexp in sexps concat (pprint sexp))))
+       (when insert-p
+         (insert lines))
+       lines))))
+
 (defun mood--gen-module-help (section module path)
   "Workhorse helper for `mood-help-module'.
 Return string Insert help for given module in current buffer"
-  (let* ((manifest (mood--ingest-manifest section module))
-         (module-path (join-path path "packages.el"))
-         (extracted-flags (mood--normalise-extracted-flags module-path
-                                                       (mood--extract-module-flags (mood--read-all-forms module-path)))))
-    (destructuring-bind (&key flags autoloads description) manifest
-      (let* ((flags (mood--merge-flags flags extracted-flags))
-             (flag-help-lines (cl-loop for (flag default dir doc) in flags
-                                       collect (format "* %s: %s %s-- %s"
-                                                       (if dir "Switch" "Parameter")
-                                                       (mood--text-as-identifier (format "%s%s"
-                                                                                     (or dir ":")
-                                                                                     (keyword-or-symbol-name flag)))
-                                                       (if (not dir)
-                                                           (format (mood--text-as-special "(default %s) ")
-                                                                   (mood--text-as-identifier (format "%s" default)))
-                                                         "")
-                                                       (or doc (mood--text-as-undocumented "undocumented")))))
-             (description (or description (mood--text-as-undocumented "No description provided"))))
-        (concat (mood--format-header (format "Mood module :%s/%s" (keyword-or-symbol-name section) module))
-                (mood--format-line "")
-                (mood--format-line description)
-                (mood--format-line "")
-                (if flag-help-lines
-                    (mood--format-section "Configuration flags" flag-help-lines)
-                  (mood--text-as-undocumented "This module does not declare any configuration flags")))))))
+  (destructuring-bind (&key flags autoloads description)
+      (mood--get-manifest section module path)
+    (let* ((flag-help-lines (cl-loop for (flag default dir doc) in flags
+                                     collect (format "* %s: %s %s-- %s"
+                                                     (if dir "Switch" "Parameter")
+                                                     (mood--text-as-identifier (format "%s%s"
+                                                                                   (or dir ":")
+                                                                                   (keyword-or-symbol-name flag)))
+                                                     (if (not dir)
+                                                         (format (mood--text-as-special "(default %s) ")
+                                                                 (mood--text-as-identifier (format "%s" default)))
+                                                       "")
+                                                     (or doc (mood--text-as-undocumented "undocumented")))))
+           (description (or description (mood--text-as-undocumented "No description provided"))))
+      (concat (mood--format-header (format "Mood module :%s/%s" (keyword-or-symbol-name section) module))
+              (mood--format-line "")
+              (mood--format-line description)
+              (mood--format-line "")
+              (if flag-help-lines
+                  (mood--format-section "Configuration flags" flag-help-lines)
+                (mood--text-as-undocumented "This module does not declare any configuration flags"))))))
 
 (defun mood--gen-module-help-buffer-name (section module)
   (format "*Mood module help :%s/%s*" (keyword-or-symbol-name section) (keyword-or-symbol-name module)))
