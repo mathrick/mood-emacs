@@ -2,6 +2,9 @@
 
 (let ((always-show-recent (feature! +always-show-recent)))
   (use-package magit
+    ;; For some reason, straight.el doesn't always know that
+    ;; git-commit is included, which breaks loading magit
+    :straight '(magit :includes git-commit)
     :defer t
     :config
     (when always-show-recent
