@@ -96,5 +96,12 @@ lockfiles. FORCE has the same meaning as in
          (assq-delete-all *mood-upstream-straight-profile* (copy-alist straight-profiles))))
     (straight-freeze-versions force)))
 
+(defun mood-use-package (package &optional recipe)
+  "Simple wrapper that calls `straight-use-package' on PACKAGE
+  and then `require's it. Used during bootstrap because we can't
+  safely use `use-package' on Emacs 29+"
+  (straight-use-package (or recipe package))
+  (require package))
+
 (provide 'mood-straight)
 ;;; mood-straight.el ends here

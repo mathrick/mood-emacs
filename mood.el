@@ -57,19 +57,24 @@
         (remq 'seq straight-recipes-gnu-elpa-ignored-packages))
 
   (setq! straight-use-package-by-default t)
-  (straight-use-package 'use-package)
+  (mood-use-package 'use-package)
 
-  (use-package general)
+  ;; NB: Must use `mood-use-package' here and not `use-package',
+  ;; because in Emacs 29 this`use-package' is built-in and tries to
+  ;; macroexpand as the file is loaded, which defeats
+  ;; straight-use-package-by-default and results in us not getting the
+  ;; packages we expect
+  (mood-use-package 'general)
   ;; Compat makes life easier when supporting multiple Emacs versions,
   ;; and is broadly used, so it's a dependency for us
   ;; as-well. Although it's built-in, by its very nature we need to
   ;; `use-package' it because versions corresponding to newer Emacs
   ;; versions that what we might be running on are distributed in GNU
   ;; ELPA and mood-straight.el requires those functions.
-  (use-package compat :demand t)
+  (mood-use-package 'compat)
 
   (unless *mood-allow-litter*
-    (use-package no-littering :demand t))
+    (mood-use-package 'no-littering))
 
   (require 'mood-keys)
 
