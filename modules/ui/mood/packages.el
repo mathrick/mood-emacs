@@ -65,14 +65,24 @@
     (propertize text 'face mood-help-identifier-face))
 
 (defun mood--shorten-defflag (form)
-  "Given a `defflag' form in FORM, shorten it for on/off switches (ie. +foo -baz)."
+  "Given a `defflag' form in FORM, shorten it for on/off switches (ie. +foo -baz).
+
+If the FLAG is not an own flag, return `nil'"
   (destructuring-bind (_ flag default dir &optional doc) form
-    `(defflag
+    (when (mood--own-flag-p flag)
+      `(defflag
        ,(if dir
             (make-symbol (format "%s%s" dir (keyword-or-symbol-name flag)))
           flag)
        ,@(unless dir `(,default))
-       ,@(when doc `(,doc)))))
+       ,@(when doc `(,doc))))))
+
+(defun mood--own-flag-p (flag)
+  "Return non-nil if FLAG is module's own flag, ie. it's accessed
+via the short form of `feature!'. If the long form is used, it's
+assumed that another module's flags are being inspected, and thus
+they shouldn't be included in the generated list of flags"
+  (= 1 (length (mood--parse-shorthand flag))))
 
 (defun mood-gen-module-manifest (section module path origin &optional insert-p)
   "Generate or return the manifest for given MODULE as a string.
@@ -105,9 +115,10 @@ suboptimal results"
                                                         (buffer-string))))
                      (_ (pp thing t)))))
         (let* ((sexps `(,@(when description `(,description))
-
-                     ,@(cl-loop for autoload in autoloads collect `(autoload ,@autoload))
-                     ,@(cl-loop for flag in flags collect (mood--shorten-defflag `(defflag ,@flag)))))
+                        ,@(cl-loop for autoload in autoloads collect `(autoload ,@autoload))
+                        ,@(cl-loop for flag in flags
+                                   for short = (mood--shorten-defflag `(defflag ,@flag))
+                                   when short collect short)))
             (lines (cl-loop for sexp in sexps concat (pprint sexp))))
        (when insert-p
          (insert lines))
@@ -119,6 +130,7 @@ Return string Insert help for given module in current buffer"
   (destructuring-bind (&key flags autoloads description)
       (mood--get-manifest section module path)
     (let* ((flag-help-lines (cl-loop for (flag default dir doc) in flags
+                                     when (mood--own-flag-p flag)
                                      collect (format "* %s: %s %s-- %s"
                                                      (if dir "Switch" "Parameter")
                                                      (mood--text-as-identifier (format "%s%s"
