@@ -34,6 +34,7 @@
 
        :vcs                             ; Git, Bazaar, Hg, and others
        magit                            ; Honestly, don't even bother with git otherwise
+       ;; p4                            ; The Enterprise™ version control, now with magit integration!
 
        :tools                           ; Various tools and utilities
        ;; vdiff                         ; What do you mean you don't like ediff?
