@@ -24,6 +24,7 @@
        defaults                         ; Basic quality of life improvements
        ;;company                        ; It's dangerous to type alone
        corfu                            ; Corfu is to Company what Vertico is to Ivy
+       devdocs                          ; Look up the docs while you dev
        expand-region                    ; Make 'em bigger
        edit-indirect                    ; Yo dawg, I heard you like buffers, so you can edit parts with a different major mode
        multiple-cursors                 ; Trust me, you want this
