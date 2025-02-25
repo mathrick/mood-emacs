@@ -56,9 +56,31 @@ be installed asynchronously when Emacs is idle."
   (require 'devdocs)
   (let ((buf (current-buffer))
         (docs (devdocs--get-desired-docs mode)))
-    (cl-flet ((setup ()
-                (with-current-buffer buf
-                  (setq-local devdocs-current-docs docs))))
+    (cl-labels ((setup ()
+                  (with-current-buffer buf
+                    (setq-local devdocs-current-docs docs)))
+                (install-timer (missing &optional (delay 3))
+                  (let ((timer-func (lambda ()
+                                      (let ((processed nil))
+                                        (condition-case err
+                                            ;; Abort installation if the user starts typing
+                                            (while-no-input
+                                              (cl-loop for doc in missing
+                                                       ;; NB: throw-on-input must be set _inside_ `while-no-input', or it will be overriden
+                                                       with throw-on-input = 'input
+                                                       do (devdocs-install doc)
+                                                       do (push doc processed))
+                                             (setup))
+                                          ;; User started typing, abort installation and do it again during idle time
+                                          (t
+                                           (message "Devdocs installation interrupted...")
+                                           (install-timer (cl-set-difference missing processed) delay)
+                                           (message "Rescheduled")))))))
+                    (if missing
+                        (progn
+                          (message "Missing devdocs for %s scheduled for installation with delay %d" (string-join missing ", ") delay)
+                          (setf *the-timer* (run-with-idle-timer delay nil timer-func)))
+                      (setup)))))
       (cl-loop for doc in docs
                append (condition-case ()
                           (progn
@@ -70,15 +92,9 @@ be installed asynchronously when Emacs is idle."
                finally do
                ;; Ensure variable capture
                (when docs
-                 (let ((timer-func (lambda ()
-                                     (cl-loop for doc in missing
-                                              do (devdocs-install doc))
-                                     (setup))))
-                   (if missing
-                       (progn
-                         (message "Missing devdocs for %s scheduled for installation" (string-join missing ", "))
-                         (run-with-idle-timer 3 nil timer-func))
-                     (setup))))))))
+                 (if missing
+                     (install-timer missing)
+                   (setup)))))))
 
 (defun devdocs--get-sh-mode (&rest _)
   "Return the shell scripting flavour used in the current buffer."
