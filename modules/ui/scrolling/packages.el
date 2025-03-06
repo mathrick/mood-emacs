@@ -24,18 +24,11 @@
     (setq smooth-scroll-margin 3)
     (smooth-scrolling-mode 1)))
 
-;; OTOH, sublimity does provide true smooth (ie. animated) scrolling,
-;; and is the least annoying and most usable implementation of
-;; it. `pixel-scroll-mode', which is included in Emacs 26+, is
+;; OTOH, good-scroll does provide true smooth (ie. animated)
+;; scrolling, and is a usable implementation of it.
+;; `pixel-scroll-mode', which is included in Emacs 26+, is
 ;; comically sluggish and thus entirely useless
 (when (feature! +smooth)
-  (use-package sublimity-scroll
-    :straight sublimity
+  (use-package good-scroll
     :config
-    (setq! sublimity-scroll-weight 3
-           sublimity-scroll-drift-length 5)
-    ;; Guard against reload, since sublimity will take the value of
-    ;; `auto-hscroll-mode', then unconditionally set it to `nil', so
-    ;; on reload this would result in hscroll being disabled
-    (setq! auto-hscroll-mode t)
-    (sublimity-mode 1)))
+    (good-scroll-mode 1)))
