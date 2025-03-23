@@ -96,6 +96,17 @@ be installed asynchronously when Emacs is idle."
                      (install-timer missing)
                    (setup)))))))
 
+;; Compatibility with Emacs 27
+(unless (fboundp 'json-available-p)
+  (require 'json nil t)
+  (defun json-available-p ()
+    "Return non-nil if Emacs is has libjansson support."
+    (and (fboundp 'json-serialize)
+         (condition-case nil
+             (json-serialize [t])
+           (:success t)
+           ((json-unavailable void-function) nil)))))
+
 (defun devdocs--get-sh-mode (&rest _)
   "Return the shell scripting flavour used in the current buffer."
   sh-shell)
