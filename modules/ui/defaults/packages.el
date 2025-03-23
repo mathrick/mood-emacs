@@ -74,10 +74,10 @@
 ;; also in vertically split windows
 (setq! truncate-partial-width-windows nil)
 
-;; Make it so that <pgup> immediately followed by <pgdown> returns to
-;; the starting position, which is not Emacs's default. Arguably this
-;; could go into :ui/scrolling, but the default behaviour is so
-;; confusing, I think the fix belongs here
+;; Make it so that <pgup> immediately followed by <pgdown> returns to the
+;; starting position, which is not Emacs's default. Arguably this could go into
+;; :ui/scrolling, but the default behaviour is so confusing, I think the fix
+;; belongs here
 (setq! scroll-preserve-screen-position t)
 
 ;; None of these commands are any more "confusing" than usual, and all
@@ -87,6 +87,16 @@
                    downcase-region
                    set-goal-column))
         (put command 'disabled nil))
+
+
+;; Emacs 29's native comp insists on popping up the warnings buffer every time
+;; it emits a warning (which happens a lot), and those happen async for a long
+;; time after startup as it lazily compiles things. It's a terribly stupid UI;
+;; this stops the spam without removing the warnings completely. Not hiding it
+;; behind a flag because I genuinely can't imagine a situation in which that's a
+;; desirable UI, and it's very easy to undo in config.el if someone really wants
+;; to
+(setq! native-comp-async-report-warnings-errors 'silent)
 
 ;; Sort directories first in dired
 (if (featurep 'ls-lisp)
