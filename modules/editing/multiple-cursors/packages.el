@@ -4,7 +4,7 @@
   :demand t
   :bind
   (("C-c C->" . mc/edit-lines)
-   ("C->" . mc/mark-next-like-this)
+   ("C->" . mc/mark-more-like-this-extended)
    ("C-<" . mc/mark-previous-like-this)
    ("C-M->" . mc/skip-to-next-like-this)
    ("M->" . mc/mark-all-dwim)))
