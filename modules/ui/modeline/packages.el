@@ -13,4 +13,11 @@
      (require 'spaceline-config)
      (setf powerline-default-separator 'wave)
      (setf spaceline-highlight-face-func #'spaceline-highlight-face-modified)
-     (spaceline-emacs-theme))))
+     (spaceline-emacs-theme)))
+  ('moody
+   (use-package moody
+     :config
+     (setf x-underline-at-descent-line t)
+     (moody-replace-mode-line-buffer-identification)
+     (moody-replace-vc-mode)
+     (moody-replace-eldoc-minibuffer-message-function))))
