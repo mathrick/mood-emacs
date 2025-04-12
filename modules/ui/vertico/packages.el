@@ -18,7 +18,8 @@
 
 (let ((style (feature! style))
       (separators (feature! extra-separators))
-      (history (feature! history)))
+      (history (feature! history))
+      (mouse (feature! mouse)))
   (ecase style
     ;; Nothing to do if the style is emacs, since that comes built-in
     (orderless
@@ -46,6 +47,11 @@
     (vertico-posframe-mode)
     :custom
     (vertico-posframe-poshandler #'posframe-poshandler-frame-top-center)))
+
+(when (feature! +mouse)
+  (use-package vertico-mouse
+    :config
+    (vertico-mouse-mode)))
 
 ;; FIXME: Split out into own packages / feature flags
 (use-package vertico-directory

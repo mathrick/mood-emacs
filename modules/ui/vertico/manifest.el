@@ -11,3 +11,7 @@ orderless)")
 boost frequent/recent candidates. With 'prescient, this only
 disables persistent storage of history, as usage-based sorting is
 built in")
+
+(defflag +posframe "Use a popup (posframe) to display vertico, instead of the minibuffer")
+
+(defflag -mouse "Don't enable mouse support")
