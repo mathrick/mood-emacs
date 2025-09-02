@@ -1,7 +1,7 @@
 ;; -*- lexical-binding: t; -*-
 
 (use-package p4
-  :straight (:fork (:repo "JohnC32/perforce-emacs")))
+  :straight (:repo "JohnC32/perforce-emacs" :branch "main"))
 
 (unless (or (feature! -magit)
             (not (feature! :vcs/magit/enabled)))

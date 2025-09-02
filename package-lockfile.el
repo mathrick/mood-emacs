@@ -65,7 +65,7 @@
  ("spinner" . "67681b8f1580a7cd7a1aa49d78eaa30d11f7c178")
  ("svg-lib" . "3595d9f1f7127ffa47d772ba0e727ecbb18bb8bd")
  ("themes" . "4aee1f5a0e54552669f747aa7c25e6027e73d76d")
- ("transient" . "7da468ef9d492d5e95853bd3871317bdc5feea21")
+ ("transient" . "00fabc76eb3dc75f742d8d2720c44e25e5772e8f")
  ("treepy.el" . "75fe3ec37e6f9b2bdfd6d0584efd984d0c00a43e")
  ("undo-tree" . "f9e7eac16f674aa7ed8fa065401d26c0258a84f8")
  ("vertico" . "0115a6e01d143e5b6ce00a6ce8eb9c8a309e4067")
