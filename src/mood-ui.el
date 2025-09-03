@@ -121,7 +121,7 @@ shape, ie. without any macroexpansion done."
                              collect `(,sym (&rest rest)
                                             `(quote (,',(cdr (assq sym syms-to-fresh)) ,@,'rest)))))
          ;; Now we simply macroexpand everything. Since
-         (expanded (macroexpand-all `(macrolet (,@expanders)
+         (expanded (macroexpand-all `(cl-macrolet (,@expanders)
                                        ,body))))
     ;; Finally, collect everything into the final list to be returned, mapping back from fresh names
     ;; to original

@@ -16,6 +16,7 @@
 ;; Definitions
 
 (require 'core-lib)
+(require 'cl-lib)
 (require 'cl)
 
 (defvar *mood-elisp-root*
@@ -277,7 +278,7 @@ optional integration or adapt to the platform."
          (args (append parsed-shorthand
                        (when modulep `(,module))
                        (when flagp `(,flag)))))
-    `(macrolet ((doit (section-or-flag
+    `(cl-macrolet ((doit (section-or-flag
                        &optional (module nil modulep) (flag nil flagp)
                        error-if-missing)
                       `(mood-feature-get ,@(when flagp `(:section ',section-or-flag))
@@ -510,7 +511,7 @@ In addition to what `mood--ingest-manifest' provides, used flags
   (let* ((config-file (eval config-file))
          (user-code (when (file-exists-p config-file)
                       (mood--read-all-forms config-file))))
-    `(macrolet ((init! (&body body)
+    `(cl-macrolet ((init! (&body body)
                        (destructuring-bind (load-forms modules)
                            (mood--parse-init-block body)
                          (let ((default-forms (loop for (section module) in modules
