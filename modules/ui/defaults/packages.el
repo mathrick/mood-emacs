@@ -40,11 +40,11 @@
      :defer 0
      :config
      (setq! cua-auto-tabify-rectangles nil)
-     ;; CUA keys here refers to C-x/C-c/C-v/C-z,, which is a bit silly, so
-     ;; the user needs to request that explicitly
      (setq! cua-enable-cursor-indications t)
      (setq! cua-enable-modeline-indications nil)
      (setq! cua-enable-region-auto-help t)
+     ;; CUA keys here refers to C-x/C-c/C-v/C-z,, which is a bit silly, so
+     ;; the user needs to request that explicitly
      (if keys
          (progn
            (setq! cua-enable-cua-keys t)
@@ -88,7 +88,6 @@
                    set-goal-column))
         (put command 'disabled nil))
 
-
 ;; Emacs 29's native comp insists on popping up the warnings buffer every time
 ;; it emits a warning (which happens a lot), and those happen async for a long
 ;; time after startup as it lazily compiles things. It's a terribly stupid UI;
@@ -104,6 +103,7 @@
   (setq! dired-listing-switches
 	 (format "%s --group-directories-first" dired-listing-switches)))
 
+;; Allow renaming directly in dired buffers
 (use-package wdired
   :general ('dired-mode-map
             "r" #'wdired-change-to-wdired-mode))
@@ -128,16 +128,16 @@
     ;; See also https://github.com/Wilfred/helpful/issues/25
     :config
     (require 'apropos)
-    (let ((do-function (lambda (button)
+    (let ((do-callable (lambda (button)
                          (helpful-callable (button-get button 'apropos-symbol))))
           (do-variable (lambda (button)
                          (helpful-variable (button-get button 'apropos-symbol)))))
       ;; :supertype only takes effect statically, at the time of
       ;; definition, so we can in fact redefine a button with itself
       ;; as its supertype
-      (define-button-type 'apropos-function    :supertype 'apropos-function    'action do-function)
-      (define-button-type 'apropos-macro       :supertype 'apropos-macro       'action do-function)
-      (define-button-type 'apropos-command     :supertype 'apropos-command     'action do-function)
+      (define-button-type 'apropos-function    :supertype 'apropos-function    'action do-callable)
+      (define-button-type 'apropos-macro       :supertype 'apropos-macro       'action do-callable)
+      (define-button-type 'apropos-command     :supertype 'apropos-command     'action do-callable)
       (define-button-type 'apropos-variable    :supertype 'apropos-variable    'action do-variable)
       (define-button-type 'apropos-user-option :supertype 'apropos-user-option 'action do-variable))
     :init
@@ -173,3 +173,8 @@
     :after all-the-icons
     :config
     (all-the-icons-nerd-fonts-prefer)))
+
+(unless (feature! -text-scale-mode)
+  (use-package default-text-scale
+    :config
+    (default-text-scale-mode)))
