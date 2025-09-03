@@ -20,7 +20,13 @@
 
   (unless (feature! -pyenv)
     (use-package pyenv-mode
-      :hook python-mode)
+      :config
+      ;; If pyenv is not set up (which is very easy, since it needs special shell evals),
+      ;; this will error out and potentially break other things, so let's catch errors
+      (add-hook 'python-mode-hook (lambda ()
+                                    (condition-case nil
+                                        (pyenv-mode)
+                                      (error nil)))))
     (use-package pyenv-mode-auto
       :after pyenv-mode))
 
