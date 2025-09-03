@@ -38,6 +38,7 @@
        ;; p4                            ; The Enterprise™ version control, now with magit integration!
 
        :tools                           ; Various tools and utilities
+       grep                             ; Make searching great again
        ;; vdiff                         ; What do you mean you don't like ediff?
 
        :checkers                        ; Trust, but verify
