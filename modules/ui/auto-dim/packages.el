@@ -1,8 +1,7 @@
 ;; -*- lexical-binding: t; -*-
 
 (let ((minibuffer (not (feature! +minibuffer)))
-      (background (or (feature! +minibuffer)
-                      )))
+      (background (or (feature! +minibuffer))))
 
   ;; https://oremacs.com/2015/04/28/blending-faces/
   (defun colir-join (r g b)
@@ -39,8 +38,7 @@ influence of C1 on the result."
          :background ,(colir-blend bg darker 0.7)))))
 
   (use-package auto-dim-other-buffers
-    :hook (after-init .
-                      (lambda ()
-                        (face-spec-set 'auto-dim-other-buffers-face
-                                       (auto-dim-guess-faces))))
+    :hook (emacs-startup . (lambda ()
+                             (face-spec-set 'auto-dim-other-buffers-face
+                                             (auto-dim-guess-faces))))
     :config (auto-dim-other-buffers-mode t)))
