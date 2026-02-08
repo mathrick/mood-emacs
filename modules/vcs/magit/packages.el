@@ -1,6 +1,10 @@
 ;; -*- lexical-binding: t; -*-
 
-(let ((always-show-recent (feature! +always-show-recent)))
+;; (use-package transient
+;;   :straight (:type git :host github :repo "magit/transient" :package "transient-latest" :local-repo "transient-latest" :ref "v0.8.8"))
+
+(let ((always-show-recent (feature! +always-show-recent))
+      (extra-opts (not (feature! -extra-opts))))
   (use-package magit
     ;; For some reason, straight.el doesn't always know that
     ;; git-commit is included, which breaks loading magit
@@ -17,7 +21,10 @@
                               #'magit-insert-recent-commits
                               ;; Don't move it if it's already included (depends on magit version)
                               #'magit-insert-unpushed-to-upstream
-                              t))))
+                              t))
+    (when extra-opts
+      (transient-append-suffix 'magit-log "=m"
+        '(7 "=M" "Only merges" "--merges") t))))
 
 (unless (feature! -forge)
   (use-package forge
